@@ -12,7 +12,7 @@
 2. 免安装版：下载 `Framepick-Portable-0.6.1.zip`，完整解压后运行 `拾帧.exe`。
 3. 启动后添加本地视频或粘贴在线视频链接，选择截图保存根目录，调整时间间隔，点击开始抽帧。
 
-最终用户无需安装 Node.js、Python 或 FFmpeg。源码可通过该版本的 **Source code (zip)** 下载。运行工具包用于源码开发，对应第三方源材料包用于核对和重建；普通使用只需选择安装版或免安装版。
+最终用户无需安装 Node.js、Python 或 FFmpeg。开发建议下载 [main 分支源码](https://github.com/xiaoweigen/shizhen/archive/refs/heads/main.zip)，其中包含发布后的准备脚本修正与验证记录。该版本的 **Source code (zip)** 保留发布时的源码。运行工具包用于源码开发，对应第三方源材料包用于核对和重建；普通使用只需选择安装版或免安装版。
 
 下载后的实际使用检查见 [发布验证 0.6.1](docs/发布验证-0.6.1.md)。
 
@@ -27,6 +27,34 @@
 - 在线链接解析后可独立下载视频并选择保存位置；队列提供进度、取消、重试和定位，支持记录归档、结果恢复与工作区备份。
 
 在线视频能力依赖 yt-dlp 和平台访问状态。Bilibili 的实际流程已验证；抖音有效登录内容、干净 Windows 安装和第二台电脑仍待验证。测试通过范围不代表所有视频和平台都兼容。
+
+## 使用截图
+
+以下是从 GitHub 下载后的程序实际操作画面，使用授权的已有视频；私人文件名、素材路径和观看链接已隐藏。截图内的视频画面属于各自权利人，不包含在本项目代码的 MIT 授权中。
+
+**导入与抽帧工作台**：查看视频信息，选择时间间隔与导出参数。
+
+![导入视频和抽帧工作台](docs/images/workbench.png)
+
+**分段裁剪**：可为不同秒数范围设置不同区域，未设置时段使用默认区域。
+
+![设置默认区域和分段裁剪](docs/images/temporal-crop.png)
+
+**抽帧选图**：按时间查看图片，单选、多选或长按拖动连续选择。
+
+![抽帧结果选图](docs/images/frame-selection.png)
+
+**故事板编辑**：设置行列、逐图备注和画面顺序，生成当前拼接页。
+
+![故事板与拼接编辑](docs/images/storyboard-editor.png)
+
+**拼图结果**：备注与画面一起导出，末行缺图的格子留空。
+
+![查看生成的故事板](docs/images/storyboard-result.png)
+
+**在线视频独立下载**：解析后选择存放位置下载，也可继续抽帧。
+
+![在线视频解析和独立下载](docs/images/online-download.png)
 
 ## 文档
 
@@ -58,7 +86,9 @@ npm run setup
 npm run dev
 ```
 
-准备脚本在项目目录创建 `.venv`、`.tools` 和下载缓存，核验本版本运行工具包的固定 SHA-256 摘要与 video-mosaic 提交，不安装到系统 Python。
+准备脚本通过 Electron 官方下载器准备固定版本的桌面运行文件，并在项目目录创建 `.venv`、`.tools` 和下载缓存，核验本版本运行工具包的固定 SHA-256 摘要与 video-mosaic 提交，不安装到系统 Python。
+
+如果使用发布时的 `v0.6.1` 源码，或遇到 Electron 未正确安装的提示，在 `npm ci` 后先运行 `node node_modules/electron/install.js`，再运行 `npm run setup`。main 分支已经自动执行这一步。首次下载需要能访问 GitHub；下载失败时修复网络后重新运行准备命令即可。
 
 ```powershell
 npm run build
