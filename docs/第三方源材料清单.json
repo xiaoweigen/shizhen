@@ -1,0 +1,255 @@
+[
+  {
+    "name": "PyAV native build recipes and patches",
+    "file": "pyav-ffmpeg-9.0.2-1-recipes.tar.gz",
+    "url": "https://codeload.github.com/PyAV-Org/pyav-ffmpeg/tar.gz/refs/tags/9.0.2-1",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "f1d1cce5b20eba71675c1c5efdd90105f79223d40abcad2cd12a0735a0379c2e",
+    "bytes": 20744,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-amf-headers",
+    "file": "AMF-headers-v1.5.2.tar.gz",
+    "url": "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v1.5.2/AMF-headers-v1.5.2.tar.gz",
+    "expectedSha256": "d3c12eb324edf05e214608b6a395a51dd95770ed9d45520185d6c3a206811c99",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "d3c12eb324edf05e214608b6a395a51dd95770ed9d45520185d6c3a206811c99",
+    "bytes": 83716,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-dav1d",
+    "file": "dav1d-1.5.4.tar.bz2",
+    "url": "https://code.videolan.org/videolan/dav1d/-/archive/1.5.4/dav1d-1.5.4.tar.bz2",
+    "expectedSha256": "2abfb0c89212e6e4733a54e0ae509ec00a5b845a6360946f918806e14aedb011",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "2abfb0c89212e6e4733a54e0ae509ec00a5b845a6360946f918806e14aedb011",
+    "bytes": 1228274,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-ffmpeg",
+    "file": "ffmpeg-9.0.2.tar.xz",
+    "url": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz",
+    "expectedSha256": "8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e",
+    "bytes": 12040788,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-lamer",
+    "file": "lamer-3.101.0.tar.gz",
+    "url": "https://github.com/basswood-io/lamer/archive/refs/tags/v3.101.0.tar.gz",
+    "expectedSha256": "81839b16fdc401e20b73389d05f32a7656008f43bcb960feff290d6f08fc109e",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "81839b16fdc401e20b73389d05f32a7656008f43bcb960feff290d6f08fc109e",
+    "bytes": 404497,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-libsvtav1",
+    "file": "SVT-AV1-v4.2.0.tar.bz2",
+    "url": "https://gitlab.com/AOMediaCodec/SVT-AV1/-/archive/v4.2.0/SVT-AV1-v4.2.0.tar.bz2",
+    "expectedSha256": "512f2ea5649e3e76c2dddcc25c2556fb67a9582baaab207c9c96161c94659dad",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "512f2ea5649e3e76c2dddcc25c2556fb67a9582baaab207c9c96161c94659dad",
+    "bytes": 10334915,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-libvmaf",
+    "file": "vmaf-3.2.1.tar.gz",
+    "url": "https://github.com/Netflix/vmaf/archive/refs/tags/v3.2.1.tar.gz",
+    "expectedSha256": "5df7386911bc15fd1ca783132528748d219768ae4fc5f8e0b61184f041648092",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "5df7386911bc15fd1ca783132528748d219768ae4fc5f8e0b61184f041648092",
+    "bytes": 18590364,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-libvpl",
+    "file": "v2.16.0.tar.gz",
+    "url": "https://github.com/intel/libvpl/archive/refs/tags/v2.16.0.tar.gz",
+    "expectedSha256": "d60931937426130ddad9f1975c010543f0da99e67edb1c6070656b7947f633b6",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "d60931937426130ddad9f1975c010543f0da99e67edb1c6070656b7947f633b6",
+    "bytes": 12968334,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-nasm",
+    "file": "nasm-2.16.03.tar.xz",
+    "url": "https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/nasm-2.16.03.tar.xz",
+    "expectedSha256": "1412a1c760bbd05db026b6c0d1657affd6631cd0a63cddb6f73cc6d4aa616148",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "1412a1c760bbd05db026b6c0d1657affd6631cd0a63cddb6f73cc6d4aa616148",
+    "bytes": 1032388,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-nv-codec-headers",
+    "file": "n13.0.19.0.tar.gz",
+    "url": "https://github.com/FFmpeg/nv-codec-headers/archive/refs/tags/n13.0.19.0.tar.gz",
+    "expectedSha256": "86d15d1a7c0ac73a0eafdfc57bebfeba7da8264595bf531cf4d8db1c22940116",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "86d15d1a7c0ac73a0eafdfc57bebfeba7da8264595bf531cf4d8db1c22940116",
+    "bytes": 83385,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-opus",
+    "file": "opus-1.6.1.tar.gz",
+    "url": "https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.6.1.tar.gz",
+    "expectedSha256": "6ffcb593207be92584df15b32466ed64bbec99109f007c82205f0194572411a1",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "status": "downloaded",
+    "sha256": "6ffcb593207be92584df15b32466ed64bbec99109f007c82205f0194572411a1",
+    "bytes": 10472813
+  },
+  {
+    "name": "PyAV-native-png",
+    "file": "libpng-1.6.58.tar.xz",
+    "url": "https://downloads.sourceforge.net/project/libpng/libpng16/1.6.58/libpng-1.6.58.tar.xz",
+    "expectedSha256": "28eb403f51f0f7405249132cecfe82ea5c0ef97f1b32c5a65828814ae0d34775",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "28eb403f51f0f7405249132cecfe82ea5c0ef97f1b32c5a65828814ae0d34775",
+    "bytes": 1070096,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-vpx",
+    "file": "vpx-1.17.0.tar.gz",
+    "url": "https://github.com/webmproject/libvpx/archive/refs/tags/v1.17.0.tar.gz",
+    "expectedSha256": "1020f184046187baa2985dbde38e0691f49c44088bca7a1842b0236c6081dc0a",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "1020f184046187baa2985dbde38e0691f49c44088bca7a1842b0236c6081dc0a",
+    "bytes": 5670546,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-webp",
+    "file": "webp-1.6.0.tar.gz",
+    "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.6.0.tar.gz",
+    "expectedSha256": "93a852c2b3efafee3723efd4636de855b46f9fe1efddd607e1f42f60fc8f2136",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "93a852c2b3efafee3723efd4636de855b46f9fe1efddd607e1f42f60fc8f2136",
+    "bytes": 3833512,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-x264",
+    "file": "x264-b35605ace3ddf7c1a5d67a2eb553f034aef41d55.tar.bz2",
+    "url": "https://code.videolan.org/videolan/x264/-/archive/b35605ace3ddf7c1a5d67a2eb553f034aef41d55/x264-b35605ace3ddf7c1a5d67a2eb553f034aef41d55.tar.bz2",
+    "expectedSha256": "6eeb82934e69fd51e043bd8c5b0d152839638d1ce7aa4eea65a3fedcf83ff224",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "6eeb82934e69fd51e043bd8c5b0d152839638d1ce7aa4eea65a3fedcf83ff224",
+    "bytes": 848719,
+    "status": "downloaded"
+  },
+  {
+    "name": "PyAV-native-x265",
+    "file": "x265_4.3.tar.gz",
+    "url": "https://github.com/Multicorewareinc/x265/releases/download/4.3/x265_4.3.tar.gz",
+    "expectedSha256": "83c53e4c8bbb8f1e33ed59e10a7d621d1d7801ca853910c3eb41f038b8ffb121",
+    "group": "PyAV-FFmpeg-9.0.2-1",
+    "sha256": "83c53e4c8bbb8f1e33ed59e10a7d621d1d7801ca853910c3eb41f038b8ffb121",
+    "bytes": 2052112,
+    "status": "downloaded"
+  },
+  {
+    "name": "Python-3.12.6-source",
+    "file": "Python-3.12.6.tar.xz",
+    "url": "https://www.python.org/ftp/python/3.12.6/Python-3.12.6.tar.xz",
+    "group": "Python-projects",
+    "sha256": "1999658298cf2fb837dffed8ff3c033ef0c98ef20cf73c5d5f66bed5ab89697c",
+    "bytes": 20434028,
+    "status": "downloaded"
+  },
+  {
+    "name": "av-19.0.0-source",
+    "file": "av-19.0.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/cd/df/0a05835bf588932b7c87ad13ac8ffc781215a3071c755edf084a67331923/av-19.0.0.tar.gz",
+    "expectedSha256": "f04d31a42570cb8ec8216569b94491e91848cdac2ac8e7591c6141fda6cc86ee",
+    "group": "Python-projects",
+    "sha256": "f04d31a42570cb8ec8216569b94491e91848cdac2ac8e7591c6141fda6cc86ee",
+    "bytes": 4301713,
+    "status": "downloaded"
+  },
+  {
+    "name": "pillow-12.3.0-source",
+    "file": "pillow-12.3.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/1c/3d/bb7fca845737cf9d7dbde16ed1843984665ff2e0a518f5db43e77ec540b9/pillow-12.3.0.tar.gz",
+    "expectedSha256": "3b8182a766685eaa002637e28b4ec8d6b18819a0c71f579bf0dbaa5830297cce",
+    "group": "Python-projects",
+    "sha256": "3b8182a766685eaa002637e28b4ec8d6b18819a0c71f579bf0dbaa5830297cce",
+    "bytes": 47025035,
+    "status": "downloaded"
+  },
+  {
+    "name": "pyinstaller-6.22.3-source",
+    "file": "pyinstaller-6.22.3.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/63/41/f90302845945abd4ed647933ff5ee7c6ac93983187be67f897b6cb613331/pyinstaller-6.22.3.tar.gz",
+    "expectedSha256": "05eb2f5615503e72939a7224d68b4aff572c6b0438ee4a17d0a4b481f399362d",
+    "group": "Python-projects",
+    "sha256": "05eb2f5615503e72939a7224d68b4aff572c6b0438ee4a17d0a4b481f399362d",
+    "bytes": 4437180,
+    "status": "downloaded"
+  },
+  {
+    "name": "video-mosaic exact source",
+    "file": "video-mosaic-4f34810f.tar.gz",
+    "url": "https://codeload.github.com/GonzaloFuentes28/video-mosaic/tar.gz/4f34810f41f38776a560a293c54a98057e178863",
+    "group": "project",
+    "sha256": "35fbcfce9458e1545b8a24da405b5cc28f5e616d06be4f75145d21a3177b9375",
+    "bytes": 22221,
+    "status": "downloaded"
+  },
+  {
+    "name": "yt-dlp-2026.08.19-source",
+    "file": "yt_dlp-2026.8.19.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/1e/e0/832fa4ca334b766a06933a196066edc3dba37cdb6f14cd98d59bcc69a4b4/yt_dlp-2026.8.19.tar.gz",
+    "expectedSha256": "9e213e48cea35c66b378e4447903f118f6392a5fa380a2b6d7070ec86f4e0af1",
+    "group": "Python-projects",
+    "sha256": "9e213e48cea35c66b378e4447903f118f6392a5fa380a2b6d7070ec86f4e0af1",
+    "bytes": 3052025,
+    "status": "downloaded"
+  },
+  {
+    "name": "zimg-3.0.6",
+    "file": "zimg-3.0.6.tar.gz",
+    "url": "https://codeload.github.com/sekrit-twc/zimg/tar.gz/refs/tags/release-3.0.6",
+    "group": "Framepick-minimal-FFmpeg",
+    "sha256": "be89390f13a5c9b2388ce0f44a5e89364a20c1c57ce46d382b1fcc3967057577",
+    "bytes": 326725,
+    "status": "downloaded"
+  },
+  {
+    "name": "CPython-openssl-3.0.15",
+    "file": "CPython-openssl-3.0.15.tar.gz",
+    "url": "https://codeload.github.com/python/cpython-source-deps/tar.gz/refs/tags/openssl-3.0.15",
+    "group": "Python-projects",
+    "sha256": "1550c87996a0858474a9dd179deab2c55eb73726b9a140b32865b02fd3d8a86b",
+    "bytes": 15473788,
+    "status": "downloaded"
+  },
+  {
+    "name": "CPython-libffi-3.4.4",
+    "file": "CPython-libffi-3.4.4.tar.gz",
+    "url": "https://codeload.github.com/python/cpython-source-deps/tar.gz/refs/tags/libffi-3.4.4",
+    "group": "Python-projects",
+    "sha256": "9d802681adfea27d84cae0487a785fb9caa925bdad44c401b364c59ab2b8edda",
+    "bytes": 1375889,
+    "status": "downloaded"
+  },
+  {
+    "name": "certifi-2026.7.22",
+    "file": "certifi-2026.7.22.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/a3/c2/24167ea9858356b47a87a50d39908bfdb72ceeefe0041586e704e5376b3a/certifi-2026.7.22.tar.gz",
+    "group": "Python-projects",
+    "sha256": "741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55",
+    "bytes": 138112,
+    "status": "downloaded"
+  }
+]

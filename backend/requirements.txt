@@ -1,0 +1,4 @@
+av==19.0.0
+Pillow==12.3.0
+pyinstaller==6.22.3
+pytest==9.1.1

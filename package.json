@@ -1,0 +1,135 @@
+{
+  "name": "framepick",
+  "productName": "拾帧",
+  "version": "0.6.1",
+  "description": "本地视频按时间抽帧与图片拼接工具",
+  "author": "xiaoweigen",
+  "private": true,
+  "main": "out/main/index.js",
+  "scripts": {
+    "setup": "python scripts/setup_runtime.py",
+    "dev": "electron-vite dev",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && electron-vite build",
+    "test:backend": ".venv\\Scripts\\python.exe -m pytest tests -q",
+    "test:desktop": "node scripts/test_desktop.cjs",
+    "build:worker": ".venv\\Scripts\\python.exe scripts/build_worker.py",
+    "package:win": "npm run build && npm run build:worker && electron-builder --win dir nsis && powershell -NoProfile -File scripts/create_launcher.ps1"
+  },
+  "dependencies": {
+    "antd": "6.6.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "5.0.4",
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3",
+    "electron-vite": "5.0.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.6"
+  },
+  "build": {
+    "appId": "local.framepick.desktop",
+    "productName": "拾帧",
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "release/0.6.1"
+    },
+    "files": [
+      "out/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "runtime/framepick-worker",
+        "to": "worker",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": ".tools",
+        "to": "tools",
+        "filter": [
+          "*.exe",
+          "*.txt",
+          "*.json",
+          "ffmpeg-LICENSE"
+        ]
+      },
+      {
+        "from": ".tools/licenses",
+        "to": "licenses",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.md"
+      },
+      {
+        "from": "backend/vendor/video_mosaic/LICENSE",
+        "to": "video-mosaic-LICENSE.txt"
+      },
+      {
+        "from": "LICENSE",
+        "to": "LICENSE"
+      },
+      {
+        "from": "OPEN_SOURCE.md",
+        "to": "OPEN_SOURCE.md"
+      },
+      {
+        "from": "DISCLAIMER.md",
+        "to": "DISCLAIMER.md"
+      },
+      {
+        "from": "PRIVACY.md",
+        "to": "PRIVACY.md"
+      },
+      {
+        "from": "licenses",
+        "to": "project-licenses",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "docs/二进制发布准备.md",
+        "to": "RELEASE_SOURCES.md"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "Framepick-Setup-${version}.${ext}",
+      "icon": "assets/icon.ico",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico"
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaoweigen/shizhen.git"
+  },
+  "homepage": "https://github.com/xiaoweigen/shizhen",
+  "bugs": {
+    "url": "https://github.com/xiaoweigen/shizhen/issues"
+  }
+}

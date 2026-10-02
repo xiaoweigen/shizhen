@@ -1,8 +1,20 @@
 # 视频抽帧截图工具
 
-产品名称为「拾帧」（Framepick），用于按时间抽取视频画面、裁剪画面并制作拼图和故事板。Windows 桌面工具，当前开发版本为 0.6.0。
+产品名称为「拾帧」（Framepick），用于按时间抽取视频画面、裁剪画面并制作拼图和故事板。Windows 桌面工具，当前公开版本为 0.6.1。
 
-**仓库目前提供产品说明、开发文档、测试摘要与许可材料。应用源码和安装包尚未公开，当前不能从此仓库构建或下载安装软件。**
+**本仓库提供经过隐私清理的应用源码、文档与许可材料。Windows 安装包通过 Releases 发布；请以已发布资产和对应验收结果为准。**
+
+## 下载和使用
+
+打开 [0.6.1 下载页](https://github.com/xiaoweigen/shizhen/releases/tag/v0.6.1)：
+
+1. 安装版：下载 `Framepick-Setup-0.6.1.exe`，运行并选择安装位置。
+2. 免安装版：下载 `Framepick-Portable-0.6.1.zip`，完整解压后运行 `拾帧.exe`。
+3. 启动后添加本地视频或粘贴在线视频链接，选择截图保存根目录，调整时间间隔，点击开始抽帧。
+
+最终用户无需安装 Node.js、Python 或 FFmpeg。源码可通过该版本的 **Source code (zip)** 下载。运行工具包用于源码开发，对应第三方源材料包用于核对和重建；普通使用只需选择安装版或免安装版。
+
+下载后的实际使用检查见 [发布验证 0.6.1](docs/发布验证-0.6.1.md)。
 
 ## 能做什么
 
@@ -27,10 +39,45 @@
 | [版本记录](CHANGELOG.md) | 各版本主要变化 |
 | [许可与署名](OPEN_SOURCE.md) | MIT 权限、署名要求和 AI 辅助说明 |
 | [第三方组件](THIRD_PARTY_NOTICES.md) | 上游来源、固定版本和独立许可 |
-| [二进制发布准备](docs/二进制发布准备.md) | 发布安装包前必须补齐的源代码与许可材料 |
+| [二进制与源材料](docs/二进制发布准备.md) | 发布包构成、第三方对应源码与重建方法 |
 | [免责声明](DISCLAIMER.md) | 保证、责任及外部素材权利说明 |
 | [隐私与公开范围](PRIVACY.md) | 当前发布内容、数据存储和反馈注意事项 |
 
 ## 许可
 
-维护者有权许可的公开材料采用 [MIT License](LICENSE)，允许修改、发布、分发和商业使用，复制或分发重要部分时保留版权与许可全文。第三方材料适用各自的许可。欢迎通过 Issue 提交不含个人信息的反馈，见 [参与说明](CONTRIBUTING.md)。
+维护者有权许可的公开材料采用 [MIT License](LICENSE)，允许修改、发布、分发和商业使用，复制或分发重要部分时保留版权与许可全文。第三方材料适用各自的许可。
+
+
+## 开发与构建
+
+需要 Windows x64、Node.js 22.12 以上和 Python 3.12。建议使用 Node.js 24 和 Python 3.12；构建工具较大，首次准备需要联网。
+
+```powershell
+npm ci
+npm run setup
+npm run dev
+```
+
+准备脚本在项目目录创建 `.venv`、`.tools` 和下载缓存，核验本版本运行工具包的固定 SHA-256 摘要与 video-mosaic 提交，不安装到系统 Python。
+
+```powershell
+npm run build
+npm run test:backend
+npm run test:desktop
+node scripts/test_v060.cjs
+node scripts/test_presets.cjs
+node scripts/test_zoom_scope.cjs
+npm run package:win
+```
+
+打包结果在 `release/0.6.1`，根目录快捷方式仅用于本地构建，不能单独传给别人。最终用户使用发布安装包，无需安装 Node.js/Python。项目测试默认使用生成视频；可选网络测试需要自己有权使用的公开视频，平台状态可能影响结果。
+
+### 结构
+
+- `src/main`：桌面接口、视频列表、项目、任务队列和维护。
+- `src/renderer`：React/Ant Design 界面、查看、裁剪、选图和故事板。
+- `backend`：PyAV 时间定位、Pillow 图像、元数据、在线下载和 HDR。
+- `backend/vendor/video_mosaic`：固定上游模块与原 MIT 许可。
+- `tests` 和 `scripts/test_*.cjs`：生成视频的处理层与桌面回归。
+
+隐私清理后的构建与下载验证见 [发布验证 0.6.1](docs/发布验证-0.6.1.md)。

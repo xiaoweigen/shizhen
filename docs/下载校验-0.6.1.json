@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Framepick-Portable-0.6.1.zip",
+    "bytes": 268081055,
+    "sha256": "49ec87cb2e071e6114d98bb282eba8357c6dd133b3efd729b87d8bce4f7d90b0"
+  },
+  {
+    "name": "Framepick-Runtime-Tools-0.6.1.zip",
+    "bytes": 52080655,
+    "sha256": "12a86dbd05f0b600555dc6acd78a527959f2ac1342dfa51209f161d1c125ae04"
+  },
+  {
+    "name": "Framepick-Setup-0.6.1.exe",
+    "bytes": 197840914,
+    "sha256": "348aac0ea40f43707cd93edca463816717f20fa7545b9cfcd56d4eaa4644527e"
+  },
+  {
+    "name": "Framepick-ThirdParty-Sources-0.6.1.zip",
+    "bytes": 177158641,
+    "sha256": "3643fb7cf51ca7d84b6af1aafc21198fdb7c6035d6062642938074f7a439b977"
+  }
+]
