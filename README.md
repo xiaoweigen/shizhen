@@ -1,5 +1,16 @@
 # 视频抽帧截图工具
 
+## ⬇ 下载软件 · Assets
+
+[![下载 Windows 安装版](assets/download-installer.svg)](https://github.com/xiaoweigen/shizhen/releases/download/v0.6.1/Framepick-Setup-0.6.1.exe)
+[![下载 Windows 免安装版](assets/download-portable.svg)](https://github.com/xiaoweigen/shizhen/releases/download/v0.6.1/Framepick-Portable-0.6.1.zip)
+
+**点击上方按钮直接下载，任选一种即可。** 安装版运行后选择安装位置；免安装版完整解压后运行 `拾帧.exe`。无需安装 Node.js、Python 或 FFmpeg。
+
+[查看全部下载文件（Assets）](https://github.com/xiaoweigen/shizhen/releases/tag/v0.6.1) · [最新版本](https://github.com/xiaoweigen/shizhen/releases/latest) · [使用说明](docs/使用说明.md)
+
+---
+
 产品名称为「拾帧」（Framepick），用于按时间抽取视频画面、裁剪画面并制作拼图和故事板。Windows 桌面工具，当前公开版本为 0.6.1。
 
 **本仓库提供经过隐私清理的应用源码、文档与许可材料。Windows 安装包通过 Releases 发布；请以已发布资产和对应验收结果为准。**
@@ -8,8 +19,8 @@
 
 打开 [0.6.1 下载页](https://github.com/xiaoweigen/shizhen/releases/tag/v0.6.1)：
 
-1. 安装版：下载 `Framepick-Setup-0.6.1.exe`，运行并选择安装位置。
-2. 免安装版：下载 `Framepick-Portable-0.6.1.zip`，完整解压后运行 `拾帧.exe`。
+1. 安装版：[下载 Framepick-Setup-0.6.1.exe](https://github.com/xiaoweigen/shizhen/releases/download/v0.6.1/Framepick-Setup-0.6.1.exe)，运行并选择安装位置。
+2. 免安装版：[下载 Framepick-Portable-0.6.1.zip](https://github.com/xiaoweigen/shizhen/releases/download/v0.6.1/Framepick-Portable-0.6.1.zip)，完整解压后运行 `拾帧.exe`。
 3. 启动后添加本地视频或粘贴在线视频链接，选择截图保存根目录，调整时间间隔，点击开始抽帧。
 
 最终用户无需安装 Node.js、Python 或 FFmpeg。开发建议下载 [main 分支源码](https://github.com/xiaoweigen/shizhen/archive/refs/heads/main.zip)，其中包含发布后的准备脚本修正与验证记录。该版本的 **Source code (zip)** 保留发布时的源码。运行工具包用于源码开发，对应第三方源材料包用于核对和重建；普通使用只需选择安装版或免安装版。
