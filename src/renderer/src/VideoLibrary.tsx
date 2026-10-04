@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { App as AntApp, Button, Checkbox, Dropdown, Input, Modal, Select, Spin, Tooltip } from 'antd'
 import type { Snapshot, VideoItem } from '../../shared/types'
 import Icon from './Icon'
@@ -21,8 +21,15 @@ export default function VideoLibrary({ state, selected, focused, setSelected, se
   const [unclassifiedClosed, setUnclassifiedClosed] = useState(false)
   const projects = pinnedFirst(state.projects)
   const projectOptions = [{ value: '', label: '未分类' }, ...projects.map(project => ({ value: project.id, label: project.name }))]
-  const matches = (video: VideoItem) => `${video.name} ${video.path || ''} ${video.platform || ''}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
+  const matches = (video: VideoItem) => `${video.name} ${video.path || video.downloadedPath || ''} ${video.platform || ''}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())
   const visible = state.videos.filter(matches)
+  useEffect(()=>{
+    const video=state.videos.find(v=>v.id===focused)
+    if(video&&!matches(video))setQuery('')
+    if(video&&!video.projectId)setUnclassifiedClosed(false)
+    const timer=setTimeout(()=>document.querySelector(`[data-video-id="${focused}"]`)?.scrollIntoView({block:'nearest'}),120)
+    return()=>clearTimeout(timer)
+  },[focused])
   async function perform(fn: () => Promise<unknown>) {
     try { await fn(); return true } catch (error) { message.error(error instanceof Error ? error.message : '操作失败。'); return false }
   }
@@ -49,8 +56,8 @@ export default function VideoLibrary({ state, selected, focused, setSelected, se
   function renderVideo(video: VideoItem) {
     return <div key={video.id} data-video-id={video.id} className={'video-row ' + (focused === video.id ? 'focused ' : '') + (dragging.drag?.id === video.id ? 'moving' : '')} onPointerDown={event => dragging.down(event, video)} onClick={() => { if (!dragging.ignoreClick.current) setFocused(video.id) }}>
       <div className="video-row-top"><Checkbox aria-label={`选择 ${video.name}`} checked={selected.includes(video.id)} onClick={e => e.stopPropagation()} onChange={e => setSelected(previous => e.target.checked ? [...new Set([...previous, video.id])] : previous.filter(id => id !== video.id))} /><span className="video-source">{video.source === 'online' ? video.platform : '本地视频'}</span><div className="video-row-controls" onClick={e => e.stopPropagation()}><Tooltip title={video.pinnedAt ? '取消置顶' : '置顶此视频'}><button aria-label={`${video.pinnedAt ? '取消置顶' : '置顶'} ${video.name}`} className={'pin-video ' + (video.pinnedAt ? 'pinned' : '')} onClick={() => void perform(() => bridge.pinVideo(video.id, !video.pinnedAt))}><Icon name="pin" size={13} /></button></Tooltip><Dropdown menu={moveMenu(video)} trigger={['click']}><button aria-label={`移动 ${video.name} 到项目`} className="move-video"><Icon name="folder" size={13} /></button></Dropdown><button aria-label={`移除 ${video.name}`} className="remove-video" onClick={() => removeVideos([video])}><Icon name="close" size={14} /></button></div></div>
-      <div className="video-row-content"><div className="video-thumb">{video.thumbnailUrl ? <img src={video.thumbnailUrl} alt="" draggable={false} /> : <Icon name="film" size={23} />}{video.status === 'reading' && <Spin size="small" />}</div><div className="video-description"><Tooltip title={video.path || video.url}><strong>{video.name}</strong></Tooltip><span>{video.info ? `${duration(video.info.duration)} · ${video.info.width || '—'} × ${video.info.height || '—'}` : video.status === 'reading' ? '正在读取视频信息…' : '无法读取视频'}</span></div></div>
-      <div className="video-row-bottom">{video.status === 'error' ? <Tooltip title={video.error}><span className="error-text">{video.error}</span></Tooltip> : <><span>{video.info?.codec?.toUpperCase() || '读取中'}</span>{video.downloadedPath ? <span className="override-badge">已下载</span> : video.override ? <span className="override-badge">单独设置</span> : <span>{video.info?.size ? size(video.info.size) : '—'}</span>}{video.crop && <span className="override-badge">已裁剪</span>}</>}</div>
+      <div className="video-row-content"><div className="video-thumb">{video.thumbnailUrl ? <img src={video.thumbnailUrl} alt="" draggable={false} /> : <Icon name="film" size={23} />}{video.status === 'reading' && <Spin size="small" />}</div><div className="video-description"><Tooltip title={video.downloadedPath || video.path || video.url}><strong>{video.name}</strong></Tooltip><span>{video.info ? `${duration(video.info.duration)} · ${video.info.width || '—'} × ${video.info.height || '—'}` : video.status === 'reading' ? '正在读取视频信息…' : '无法读取视频'}</span></div></div>
+      <div className="video-row-bottom">{video.status === 'error' ? <Tooltip title={video.error}><span className="error-text">{video.error}</span></Tooltip> : <><span>{video.info?.codec?.toUpperCase() || '读取中'}</span>{['waiting','running'].includes(video.downloadStatus||'') ? <span className="override-badge">{video.downloadStatus==='waiting'?'等待下载':`下载 ${Math.round(video.downloadProgress||0)}%`}</span> : video.downloadStatus==='error'&&!video.localReady ? <span className="error-text">下载失败</span> : video.downloadStatus==='cancelled'&&!video.localReady ? <span>下载已取消</span> : video.downloadedPath&&video.localReady ? <span className="override-badge">已下载</span> : video.override ? <span className="override-badge">单独设置</span> : <span>{video.info?.size ? size(video.info.size) : '—'}</span>}{video.crop && <span className="override-badge">已裁剪</span>}</>}</div>
     </div>
   }
   const unclassified = pinnedFirst(visible.filter(video => !video.projectId))

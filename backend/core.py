@@ -16,6 +16,8 @@ import time
 from datetime import datetime
 import uuid
 from urllib.parse import urlparse, parse_qs
+from urllib.request import Request, urlopen
+from io import BytesIO
 
 import av
 from PIL import Image, ImageFont, ImageChops, ImageStat
@@ -24,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent / 'vendor'))
 from video_mosaic import mosaic as upstream_mosaic
 import storyboard
 from tonemapping import ToneMapper
+from public_share import fetch_share
 
 NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 MAX_FRAMES = 100_000
@@ -42,8 +45,12 @@ def check_cancel(cancel):
 
 def online_diagnostic(detail):
     lower=detail.lower()
+    if 'fresh cookies' in lower:
+        return '【访客访问限制】平台未接受当前匿名访问状态；这不一定要求登录。已尝试公开分享页和访客方式，可稍后重试或更新解析器。需要时可自行提供 Cookie。'
+    if any(text in lower for text in ('http error 412','http error 429','precondition failed')):
+        return '【平台限流】平台拒绝了当前请求或限制访问频率，请稍后重试。登录也不保证解除这个限制。'
     if any(text in lower for text in ('fresh cookies','sign in','login','log in','cookies are needed','http error 403','http error 401')):
-        return '【访问状态】该视频需要有效访问状态或受到平台限制。请选择 Cookie 文件后重试，并确认浏览器能正常观看。'
+        return '【访问状态】匿名方式未能取得这个视频，可能涉及登录权限、地区限制或平台访问限制。需要时可自行选择 Cookie，并确认页面能正常观看。'
     if any(text in lower for text in ('timed out','timeout','name resolution','getaddrinfo','connection refused','network is unreachable','ssl','connection reset')):
         return '【网络】未能连接视频平台。请检查网络、代理或稍后重试。'
     if any(text in lower for text in ('http error 404','video unavailable','not available','has been deleted','does not exist')):
@@ -192,6 +199,8 @@ class Processor:
         self.tools = Path(tools)
         self.cache = Path(cache)
         self.cache.mkdir(parents=True, exist_ok=True)
+        self.guest_cookies = {}
+        self.public_share_urls = set()
 
     def tool(self, name):
         if name == 'yt-dlp' and getattr(self, 'decoder', None):
@@ -373,9 +382,23 @@ class Processor:
                 pass  # Metadata remains usable even when this decoder cannot make a poster.
         return info
 
-    def _online_args(self, settings):
+    def _online_args(self, settings, url=None):
         args = [self.tool('yt-dlp'), '--ignore-config', '--no-playlist', '--no-warnings', '--socket-timeout', '15', '--retries', '1', '--ffmpeg-location', str(self.tools)]
         cookie = settings.get('cookiePath')
+        guest = self.guest_cookies.get(url, []) if not cookie else []
+        if guest:
+            copies = self.cache / 'cookies'
+            copies.mkdir(exist_ok=True)
+            temporary = copies / (uuid.uuid4().hex+'.txt')
+            lines = ['# Netscape HTTP Cookie File']
+            for item in guest:
+                domain = str(item.get('domain',''))
+                if not any(domain.lstrip('.') == host or domain.lstrip('.').endswith('.'+host) for host in ('bilibili.com','b23.tv','douyin.com','iesdouyin.com')): continue
+                fields=[domain,'TRUE' if domain.startswith('.') else 'FALSE',str(item.get('path','/')),'TRUE' if item.get('secure') else 'FALSE',str(max(0,int(item.get('expirationDate') or 0))),str(item.get('name','')),str(item.get('value',''))]
+                if any('\t' in value or '\n' in value or '\r' in value for value in fields): continue
+                lines.append('\t'.join(fields))
+            temporary.write_text('\n'.join(lines)+'\n',encoding='utf-8')
+            args += ['--cookies',str(temporary)]
         if cookie:
             if not Path(cookie).is_file():
                 raise ProcessingError('Cookie 文件不存在，请重新选择。')
@@ -393,7 +416,7 @@ class Processor:
         url = match.group().rstrip('，。；、！!）)]}')
         parsed = urlparse(url)
         host = (parsed.hostname or '').lower()
-        allowed = ('bilibili.com', 'b23.tv', 'douyin.com')
+        allowed = ('bilibili.com', 'b23.tv', 'douyin.com', 'iesdouyin.com')
         if not any(host == domain or host.endswith('.' + domain) for domain in allowed):
             raise ProcessingError('当前支持 Bilibili、抖音的视频详情页或分享链接。')
         if host.endswith('douyin.com'):
@@ -402,14 +425,31 @@ class Processor:
                 url = 'https://www.douyin.com/video/' + identity
             elif host in ('www.douyin.com','douyin.com') and parsed.path in ('','/'):
                 raise ProcessingError('【链接类型】抖音首页不能确定视频，请复制具体视频的详情页或分享链接。')
-        elif host.endswith('bilibili.com') and parsed.path in ('','/'):
-            raise ProcessingError('【链接类型】Bilibili 首页不能确定视频，请复制具体视频详情页或分享链接。')
+        elif host.endswith('bilibili.com'):
+            if parsed.path in ('','/'):
+                identity=(parse_qs(parsed.query).get('bvid') or [None])[0]
+                if not identity: raise ProcessingError('【链接类型】Bilibili 首页不能确定视频，请复制具体视频详情页或分享链接。')
+            else: identity=(re.search(r'/video/(BV[0-9A-Za-z]+|av\d+)',parsed.path) or [None,None])[1]
+            if identity:
+                page=(parse_qs(parsed.query).get('p') or [''])[0]
+                url='https://www.bilibili.com/video/'+identity+'/'+('?p='+page if page.isdigit() and int(page)>0 else '')
         return url
 
-    def resolve(self, text, settings, cancel):
+    def resolve(self, text, settings, cancel, guest_cookies=None):
         url = self.normalize_url(text)
+        if guest_cookies is not None:
+            if not isinstance(guest_cookies,list) or len(guest_cookies)>200: raise ProcessingError('访客状态格式无效。')
+            self.guest_cookies[url]=guest_cookies
         check_cancel(cancel)
-        raw = json.loads(self.run(self._online_args(settings) + ['--dump-single-json', '--skip-download', '--', url], cancel, timeout=90))
+        try:
+            raw = json.loads(self.run(self._online_args(settings,url) + ['--dump-single-json', '--skip-download', '--', url], cancel, timeout=90))
+        except ProcessingError as original:
+            if 'douyin.com' not in (urlparse(url).hostname or ''): raise
+            try:
+                check_cancel(cancel);raw=fetch_share(url);check_cancel(cancel)
+                self.public_share_urls.add(self.normalize_url(raw['webpage_url']))
+            except Cancelled:raise
+            except Exception:raise original
         if raw.get('_type') == 'playlist':
             entries = [item for item in raw.get('entries', []) if item]
             if not entries:
@@ -417,26 +457,53 @@ class Processor:
             raw = entries[0]
         selected = (raw.get('requested_formats') or [raw])
         video = next((item for item in selected if item.get('vcodec') not in ('none', None)), raw)
+        thumbnail = self.online_cover(raw.get('thumbnail'),url,cancel)
         return {
             'name': raw.get('title') or raw.get('id') or '在线视频', 'url': raw.get('webpage_url') or url,
             'remoteId': str(raw.get('id', '')), 'platform': '抖音' if 'douyin' in url else 'Bilibili',
+            'publicShare': self.normalize_url(raw.get('webpage_url') or url) in self.public_share_urls,
             'info': {'duration': _number(raw.get('duration')), 'width': int(video.get('width') or 0), 'height': int(video.get('height') or 0),
                 'fps': _number(video.get('fps')), 'codec': video.get('vcodec') or '下载后核验', 'format': raw.get('ext') or '待核验',
                 'size': int(_number(video.get('filesize') or video.get('filesize_approx'))), 'bitrate': 0, 'audioCodec': '下载后核验', 'rotation': 0, 'hdr': False,
-                'warning': '在线信息为预估，下载完成后会重新核验。'}
+                'thumbnail':thumbnail,
+                'warning': '在线信息为预估，下载完成后会重新核验。'+('未配置登录状态，清晰度以平台公开提供的版本为准。' if not settings.get('cookiePath') else '')}
         }
 
-    def download(self, video, settings, cancel, emit):
-        directory = self.cache / 'downloads' / uuid.uuid4().hex
+    def online_cover(self, url, referer, cancel):
+        if not url: return None
+        parsed=urlparse(url)
+        if parsed.scheme not in ('http','https') or not any((parsed.hostname or '').endswith('.'+domain) or parsed.hostname==domain for domain in ('hdslb.com','bilibili.com','douyinpic.com','byteimg.com','pstatp.com','ibytedtos.com')): return None
+        try:
+            check_cancel(cancel)
+            with urlopen(Request(url,headers={'User-Agent':'Mozilla/5.0','Referer':referer}),timeout=12) as response:
+                data=response.read(4*1024*1024+1)
+            if len(data)>4*1024*1024: return None
+            with Image.open(BytesIO(data)) as source:
+                source.thumbnail((640,640));image=source.convert('RGB')
+            cover=self.cache/'covers'/(hashlib.sha256(url.encode()).hexdigest()+'.jpg');cover.parent.mkdir(exist_ok=True)
+            try: image.save(cover,quality=85)
+            finally: image.close()
+            return str(cover)
+        except Cancelled: raise
+        except Exception: return None
+
+    def download(self, video, settings, cancel, emit, output_root=None):
+        # Assemble fragments beside the final user file, on the same volume.
+        directory = Path(output_root).resolve() / ('.framepick-download-' + uuid.uuid4().hex) if output_root else self.cache / 'downloads' / uuid.uuid4().hex
         directory.mkdir(parents=True)
         height = int(settings.get('onlineQuality') or 1080)
-        args = self._online_args(settings) + ['--newline', '--merge-output-format', 'mp4', '-f', f'bestvideo[height<={height}]+bestaudio/best[height<={height}]', '-o', str(directory / 'video.%(ext)s'), '--print', 'after_move:FRAMEPICK_FILE:%(filepath)s', '--progress', '--progress-template', 'download:FRAMEPICK_PROGRESS:%(progress._percent_str)s', '--', video['url']]
+        args = self._online_args(settings,self.normalize_url(video['url'])) + ['--newline', '--merge-output-format', 'mp4', '--format-sort-force', '-S', 'res,+vcodec:avc,+acodec:m4a', '-f', f'bestvideo[height<={height}]+bestaudio/best[height<={height}]/best[height<=?{height}]/bestvideo[height<=?{height}]', '-o', str(directory / 'video.%(ext)s'), '--print', 'after_move:FRAMEPICK_FILE:%(filepath)s', '--progress', '--progress-template', 'download:FRAMEPICK_PROGRESS:%(progress._percent_str)s', '--', video['url']]
+        info_file=None
         def progress(line):
             if line.startswith('FRAMEPICK_PROGRESS:'):
                 value = re.search(r'([\d.]+)%', line)
                 if value:
                     emit({'stage': '下载视频', 'progress': float(value.group(1)) * .15, 'completed': 0, 'total': 0})
         try:
+            if video.get('publicShare') or self.normalize_url(video['url']) in self.public_share_urls:
+                raw=fetch_share(video['url']);check_cancel(cancel)
+                info_file=directory/'public-info.json';atomic_json(info_file,raw)
+                args=args[:-2]+['--load-info-json',str(info_file)]
             output = self.run(args, cancel, timeout=7200, progress=progress)
             paths = [line.removeprefix('FRAMEPICK_FILE:').strip() for line in output.splitlines() if line.startswith('FRAMEPICK_FILE:')]
             # Some frozen downloaders print Windows paths using the system code page.
@@ -451,13 +518,24 @@ class Processor:
                 raise ProcessingError('下载完成但未找到完整视频。')
             return actual, directory
         except BaseException:
-            self.remove_cache(directory)
+            self.remove_download_directory(directory, output_root)
             raise
+        finally:
+            if info_file: info_file.unlink(missing_ok=True)
 
     def remove_cache(self, directory):
         directory = Path(directory).resolve()
         if directory.is_relative_to(self.cache.resolve()) and directory != self.cache.resolve():
             shutil.rmtree(directory, ignore_errors=True)
+
+    def remove_download_directory(self, directory, output_root):
+        directory = Path(directory)
+        if output_root and not directory.is_symlink():
+            resolved = directory.resolve()
+            if resolved.parent == Path(output_root).resolve() and re.fullmatch(r'\.framepick-download-[0-9a-f]{32}', resolved.name):
+                shutil.rmtree(resolved, ignore_errors=True)
+                return
+        self.remove_cache(directory)
 
     def download_video(self, video, settings, output_root, cancel, emit):
         if video.get('source') != 'online':
@@ -465,15 +543,16 @@ class Processor:
         root = Path(output_root).resolve()
         root.mkdir(parents=True, exist_ok=True)
         directory = None
-        partial = None
         destination = None
         committed = False
         started = time.monotonic()
         try:
             emit({'stage': '下载视频', 'progress': 0, 'completed': 0, 'total': 0})
+            if shutil.disk_usage(root).free < 32*1024*1024:
+                raise ProcessingError('视频保存位置的空间不足，请更换位置后重试。')
             def progress(event):
                 emit({**event, 'progress': min(90, event.get('progress', 0) * 6)})
-            source, directory = self.download(video, settings, cancel, progress)
+            source, directory = self.download(video, settings, cancel, progress, output_root=root)
             check_cancel(cancel)
             emit({'stage': '核验视频', 'progress': 90})
             info = self.probe(source)
@@ -488,26 +567,15 @@ class Processor:
                 except FileExistsError:
                     continue
             if destination is None: raise ProcessingError('同名视频过多，请选择其他保存文件夹。')
-            partial = root / ('.framepick-download-' + uuid.uuid4().hex + '.part')
             emit({'stage': '保存视频', 'progress': 94})
-            total = source.stat().st_size
-            if shutil.disk_usage(root).free < total+16*1024*1024:raise ProcessingError('视频保存位置的空间不足，请更换位置后重试。')
-            copied = 0
-            with source.open('rb') as incoming, partial.open('xb') as outgoing:
-                while block := incoming.read(4 * 1024 * 1024):
-                    check_cancel(cancel)
-                    outgoing.write(block)
-                    copied += len(block)
-                    emit({'stage': '保存视频', 'progress': 94 + 5 * copied / total})
             check_cancel(cancel)
-            partial.replace(destination)
+            source.replace(destination)
             committed = True
             return {'downloadPath': str(destination), 'folder': str(root), 'info': info,
                     'elapsed': round(time.monotonic() - started, 2)}
         finally:
-            if partial is not None: partial.unlink(missing_ok=True)
             if destination is not None and not committed: destination.unlink(missing_ok=True)
-            if directory is not None: self.remove_cache(directory)
+            if directory is not None: self.remove_download_directory(directory, root)
 
     def output_directory(self, root, name, source_key, settings, resume=None):
         root = Path(root).resolve()
@@ -585,9 +653,10 @@ class Processor:
                 if saved is not None and saved.is_file():
                     source_path = saved.resolve()
                 else:
-                    emit({'stage': '下载视频', 'progress': 0, 'completed': 0, 'total': 0})
-                    source_path, download_folder = self.download(video, settings, cancel, emit)
+                    raise ProcessingError('已保存的视频不存在，请先下载到保存文件夹或重新定位。不会自动重新下载。')
                 key_text = 'online:' + video.get('platform', '') + ':' + (video.get('remoteId') or video['url'])
+                stat = source_path.stat()
+                key_text += f':{str(source_path).casefold()}:{stat.st_size}:{stat.st_mtime_ns}'
             else:
                 source_path = Path(video['path']).resolve()
                 if not source_path.is_file():

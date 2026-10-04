@@ -8,7 +8,7 @@ import type { ProcessingWorker } from './worker'
 export function viewport(value: Partial<ViewportPrefs>): ViewportPrefs {
   const result = { ...DEFAULT_VIEWPORT, ...value }
   const keys = [result.zoomIn, result.zoomOut, result.fit, result.actual, result.close]
-  if (keys.some(key => typeof key !== 'string' || key.length > 100 || !/^(?:(?:Control|Alt|Shift|Meta)\+)*(?:[A-Za-z][A-Za-z0-9]*)$/.test(key)) || new Set(keys).size !== keys.length) throw new Error('快捷键无效或重复，请重新设置。')
+  if (keys.some(key => typeof key !== 'string' || key.length > 150 || !/^(?:(?:Control|Alt|Shift|Meta)\+)*(?:[A-Za-z][A-Za-z0-9]*)(?:\+[A-Za-z][A-Za-z0-9]*)*$/.test(key) || key==='F2' || !key.split('+').some(part=>!['Control','Alt','Shift','Meta'].includes(part))) || new Set(keys).size !== keys.length) throw new Error('快捷键无效、重复或使用了菜单专用 F2，请重新设置。')
   if (!['control','alt','shift','none','disabled'].includes(result.wheel) || !['space','middle','left'].includes(result.pan)) throw new Error('画面操作设置无效。')
   if (!Number.isFinite(result.longPressMs) || result.longPressMs < 150 || result.longPressMs > 1000 || !Number.isFinite(result.zoomStep) || result.zoomStep < 1.05 || result.zoomStep > 2) throw new Error('长按时间或缩放步长超出范围。')
   result.longPressPan = result.longPressPan === true
@@ -118,7 +118,7 @@ export function registerServices(c: { handle(name: string, fn: (...args: any[]) 
     if (pick.canceled || !pick.filePath) return false
     const state = c.getState(), drafts = Object.fromEntries(state.jobs.filter(j=>j.manifest&&fs.existsSync(j.manifest)).map(j=>[j.id,read(j.manifest!,null)]))
     const settings = {...state.settings,cookiePath:''}
-    const videos = state.videos.map(v=>({...v,mediaUrl:undefined,thumbnailUrl:undefined,override:v.override?{...v.override,cookiePath:''}:undefined}))
+    const videos = state.videos.map(v=>({...v,mediaUrl:undefined,thumbnailUrl:undefined,previewPath:undefined,previewSource:undefined,previewStatus:undefined,previewError:undefined,override:v.override?{...v.override,cookiePath:''}:undefined}))
     const jobs = state.jobs.map(j=>({...j,settings:{...j.settings,cookiePath:''}}))
     const backup = {version:1,application:'Framepick',savedAt:new Date().toISOString(),workspace:{...state,health:undefined,settings,videos,jobs,paused:true},drafts}
     atomic(pick.filePath,JSON.parse(JSON.stringify(backup,(key,value)=>key==='cookiePath'?'':key==='mediaUrl'||key==='thumbnailUrl'?undefined:value)))
@@ -147,6 +147,9 @@ export function registerServices(c: { handle(name: string, fn: (...args: any[]) 
       const v = {...video,id:id(video.id),projectId:video.projectId?id(video.projectId):undefined,mediaUrl:undefined,thumbnailUrl:undefined}
       if (!['local','online'].includes(v.source)) continue
       if (v.override) v.override = c.settings(v.override)
+      const base=v.override||c.settings(source.settings),range=v.extractRange||{start:base.start,end:base.end},limit=Number.isFinite(v.info?.duration)?Math.max(0,v.info.duration):Infinity
+      const start=Number.isFinite(range.start)?Math.max(0,Math.min(range.start,Math.max(0,limit-.001))):0,end=range.end===null?null:Number.isFinite(range.end)?Math.min(Math.max(0,range.end),limit):null
+      v.extractRange=end!==null&&end<=start?{start:0,end:null}:{start,end}
       if (v.source === 'local' && (!v.path || !fs.existsSync(v.path))) { v.status='error';v.error='素材路径已失效，请点击重新定位。' }
       const media=v.source==='local'?v.path:v.downloadedPath
       if(media&&fs.existsSync(media))v.mediaUrl=c.asset(media)
@@ -164,6 +167,7 @@ export function registerServices(c: { handle(name: string, fn: (...args: any[]) 
     }
     state.templates = [...state.templates,...(source.templates || []).map((t:any)=>({...t,id:randomUUID(),settings:c.settings(t.settings)}))]
     state.viewport = viewport(source.viewport || DEFAULT_VIEWPORT)
+    state.timeInputMode=source.timeInputMode==='milliseconds'?'milliseconds':'clock'
     state.settings = c.settings({...source.settings,cookiePath:''});state.paused=true;c.changed()
   })
   handle('relocate-video', async (id: string) => {
@@ -174,7 +178,7 @@ export function registerServices(c: { handle(name: string, fn: (...args: any[]) 
     if (pick.canceled) return
     const info = await c.worker.request('probe',{path:pick.filePaths[0]})
     if (video.source==='local') video.path=pick.filePaths[0];else video.downloadedPath=pick.filePaths[0]
-    video.info=info;video.status='ready';video.error=undefined;video.mediaUrl=c.asset(pick.filePaths[0]);if(info.thumbnail)video.thumbnailUrl=c.asset(info.thumbnail);c.changed()
+    video.previewPath=undefined;video.previewSource=undefined;video.previewStatus=undefined;video.localReady=true;video.info=info;video.status='ready';video.error=undefined;video.mediaUrl=c.asset(pick.filePaths[0]);if(info.thumbnail)video.thumbnailUrl=c.asset(info.thumbnail);c.changed()
   })
   let release: any = null, updating = false
   async function latest() {

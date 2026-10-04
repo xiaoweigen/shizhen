@@ -7,6 +7,18 @@ from video_mosaic import mosaic
 
 MAX_PIXELS = 24_000_000
 
+def marker_geometry(settings, width, height, name):
+    requested = settings.get('markerSize', 32)
+    if not isinstance(requested,(int,float)) or not math.isfinite(requested) or not 12 <= requested <= 120:
+        raise ValueError('图序号大小应为 12～120。')
+    size = max(4, min(round(requested), width-8, height-8))
+    inset = max(0, min(8, (min(width,height)-size)/2))
+    corner = settings.get('markerCorner','tl')
+    point = settings.get('markerPositions',{}).get(name, {'x':1 if corner.endswith('r') else 0,'y':1 if corner.startswith('b') else 0})
+    if not isinstance(point,dict) or not all(isinstance(point.get(key),(int,float)) and math.isfinite(point[key]) and 0 <= point[key] <= 1 for key in ('x','y')):
+        raise ValueError('图序号位置超出画面。')
+    return size, inset+max(0,width-size-2*inset)*point['x'], inset+max(0,height-size-2*inset)*point['y']
+
 def grid(settings):
     columns = max(1, min(20, int(settings.get('columns') or 4)))
     requested = max(1, min(100, int(settings.get('perSheet') or 20)))
@@ -83,7 +95,7 @@ def compose_page(records, output, settings, geometry, notes, offset, on_progress
                                  bg_color=settings.get('background') or '#182c26', labels=bool(settings.get('labels')), on_progress=on_progress)
     canvas = None
     try:
-        if not mixed and not g['noteHeight'] and base.size == (g['width'], g['height']) and offset == 0:
+        if not mixed and not g['noteHeight'] and not settings.get('markersEnabled') and base.size == (g['width'], g['height']) and offset == 0:
             return
         canvas = Image.new('RGB', (g['width'], g['height']), settings.get('background') or '#182c26')
         draw = ImageDraw.Draw(canvas)
@@ -103,6 +115,17 @@ def compose_page(records, output, settings, geometry, notes, offset, on_progress
             else:
                 with base.crop((x, old_y, x + g['imageWidth'], old_y + g['imageHeight'] + g['labelHeight'])) as region:
                     canvas.paste(region, (x, y))
+            if settings.get('markersEnabled'):
+                size, dx, dy = marker_geometry(settings,g['imageWidth'],g['imageHeight'],item['name'])
+                left, top = round(x+dx), round(y+dy)
+                number = str(index+1+(offset if settings.get('markerContinuous') else 0))
+                circle = settings.get('markerStyle','circle') == 'circle'
+                color, background = settings.get('markerColor','#182c26'), settings.get('markerBackground','#ffffff')
+                box = (left,top,left+size-1,top+size-1)
+                if circle: draw.ellipse(box,fill=background,outline=color,width=max(1,round(size*.035)))
+                else: draw.rectangle(box,fill=background)
+                font = mosaic.load_font(max(4,round(size*(.63 if circle else .7)/max(1,len(number)*.55))))
+                draw.text((left+size/2,top+size/2),number,font=font,fill=color,anchor='mm')
             if g['labelHeight']:
                 font_size = max(12, int(g['imageWidth'] * .04))
                 label_y = y + g['imageHeight']

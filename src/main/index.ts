@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, protocol, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, protocol, shell, Tray } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
 import { Readable } from 'node:stream'
@@ -6,9 +6,14 @@ import { randomUUID } from 'node:crypto'
 import { DEFAULT_VIEWPORT, ExtractSettings, Job, Snapshot, VideoItem, CropRect, CropSegment, expectedCount, migrateSettings, videoSettings } from '../shared/types'
 import { ProcessingWorker, WorkerFailure } from './worker'
 import { registerServices, spaceEstimate, viewport } from './services'
+import {anonymousCookies} from './anonymous'
+import {registerEditing} from './editing'
+import {localVideoPath, requireLocalVideo} from './media'
 
 const hidden = process.argv.includes('--hidden')
 if (hidden) { app.disableHardwareAcceleration(); app.setPath('userData', path.resolve(process.env.FRAMEPICK_TEST_DATA || '.test-artifacts/user-data')) }
+const ownsWorkspace=app.requestSingleInstanceLock()
+if(!ownsWorkspace)app.quit()
 protocol.registerSchemesAsPrivileged([{ scheme: 'framepick-media', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true, corsEnabled: true } }])
 
 let window: BrowserWindow | undefined
@@ -16,6 +21,9 @@ let worker: ProcessingWorker
 let state: Snapshot
 let busy = false
 let quitting = false
+let tray:Tray|undefined
+let closePrompt=false
+app.on('second-instance',()=>{window?.show();if(window?.isMinimized())window.restore();window?.focus()})
 let persistTimer: NodeJS.Timeout | undefined
 const assets = new Map<string, string>()
 const assetIds = new Map<string, string>()
@@ -32,13 +40,20 @@ function asset(file: string): string {
   return `framepick-media://asset/${id}?v=${version}`
 }
 function publicInfo(video: VideoItem) {
-  const playable = video.source === 'online' ? video.downloadedPath : video.path
+  const source = localVideoPath(video)
+  video.localReady = !!source
+  // Old online preview downloads are never used as the processing source.
+  if (!source || (video.previewSource && path.resolve(video.previewSource).toLowerCase() !== source.toLowerCase())) {
+    video.previewPath = undefined; video.previewSource = undefined; video.previewStatus = undefined
+  }
+  const playable = source && video.previewSource && video.previewPath && fs.existsSync(video.previewPath) ? video.previewPath : source
   if (playable && fs.existsSync(playable)) { allowedPaths.add(path.resolve(playable)); video.mediaUrl = asset(playable); if (video.source === 'online') allowedPaths.add(path.dirname(path.resolve(playable))) }
   else video.mediaUrl = undefined
   if (video.info?.thumbnail) video.thumbnailUrl = asset(video.info.thumbnail)
   return video
 }
 function saveState() {
+  if(!state)return
   const file = path.join(app.getPath('userData'), 'workspace.json')
   try {
     fs.mkdirSync(path.dirname(file), { recursive: true })
@@ -47,6 +62,15 @@ function saveState() {
   } catch { /* Do not interrupt processing when preference storage is unavailable. */ }
 }
 function changed() {
+  for (const video of state.videos) {
+    publicInfo(video)
+    const download = [...state.jobs].reverse().find(job => job.videoId === video.id && job.kind === 'download')
+    video.downloadStatus = download?.status; video.downloadProgress = download?.progress
+    video.downloadError = download?.error; video.downloadJobId = download?.id
+  }
+  const processing=state.jobs.find(job=>job.status==='running')
+  if(window&&!window.isDestroyed())window.setProgressBar(processing?Math.max(.01,Math.min(1,processing.progress/100)):-1)
+  tray?.setToolTip(processing?`拾帧 · ${processing.stage} · ${Math.round(processing.progress)}%`.slice(0,120):'拾帧 · 视频抽帧与拼接')
   if (window && !window.isDestroyed()) window.webContents.send('state', state)
   if (persistTimer) clearTimeout(persistTimer)
   persistTimer = setTimeout(saveState, 300)
@@ -68,6 +92,10 @@ function settings(value: ExtractSettings): ExtractSettings {
   result.noteHeight = Math.max(40, Math.min(500, Math.round(result.noteHeight)))
   result.noteFontSize = Math.max(8, Math.min(36, Math.round(result.noteFontSize)))
   result.notesEnabled = result.notesEnabled === true
+  if(!Number.isFinite(result.markerSize) || result.markerSize<12 || result.markerSize>120 || !['circle','number'].includes(result.markerStyle) || !['tl','tr','bl','br'].includes(result.markerCorner) || !/^#[0-9a-f]{6}$/i.test(result.markerColor) || !/^#[0-9a-f]{6}$/i.test(result.markerBackground)) throw new Error('图序号设置无效。')
+  result.markersEnabled=result.markersEnabled===true;result.markerContinuous=result.markerContinuous===true;result.markerSize=Math.round(result.markerSize)
+  if(!result.markerPositions || typeof result.markerPositions!=='object' || Array.isArray(result.markerPositions) || Object.keys(result.markerPositions).length>100000) throw new Error('图序号位置无效。')
+  for(const [name,point] of Object.entries(result.markerPositions)) if(path.basename(name)!==name || !point || ![point.x,point.y].every(v=>Number.isFinite(v)&&v>=0&&v<=1)) throw new Error('图序号位置超出画面。')
   if (result.crop) {
     const { x, y, width, height } = result.crop
     if (![x, y, width, height].every(Number.isFinite) || x < 0 || y < 0 || width <= 0 || height <= 0 || x + width > 1.000001 || y + height > 1.000001) throw new Error('裁剪区域超出画面。')
@@ -96,14 +124,14 @@ function settings(value: ExtractSettings): ExtractSettings {
   if (result.maxWidth !== null && (!Number.isFinite(result.maxWidth) || result.maxWidth < 16 || result.maxWidth > 16384)) throw new Error('图片宽度应在 16～16384 像素之间。')
   return result
 }
-async function addFiles(paths: string[], projectId = state.activeProjectId || undefined) {
+async function addFiles(paths: string[], projectId = state.activeProjectId || undefined, derivedFrom?:string) {
   if (!Array.isArray(paths)) throw new Error('请选择视频文件。')
   const promises: Promise<void>[] = []
   for (const raw of paths.slice(0, 500)) {
     if (typeof raw !== 'string') continue
     const file = path.resolve(raw)
     if (state.videos.some(v => v.path?.toLowerCase() === file.toLowerCase())) continue
-    const video: VideoItem = { id: randomUUID(), name: path.basename(file, path.extname(file)), source: 'local', path: file, status: 'reading', projectId }
+    const video: VideoItem = { id: randomUUID(), name: path.basename(file, path.extname(file)), source: 'local', path: file, status: 'reading', projectId,derivedFrom,extractRange:{start:0,end:null} }
     state.videos.push(video)
     changed()
     promises.push(worker.request('probe', { path: file }).then(info => {
@@ -119,22 +147,32 @@ async function pump() {
   const video = state.videos.find(item => item.id === job.videoId)
   if (!video) { job.status = 'error'; job.error = '原视频已从列表移除。'; changed(); return pump() }
   busy = true
-  job.status = 'running'; job.stage = '准备处理'; job.error = undefined; changed()
+  job.status = 'running'; job.stage = job.kind === 'download' ? '准备下载' : '准备处理'; job.error = undefined; changed()
   try {
     const download = job.kind === 'download'
-    const result = await worker.request(download ? 'download-video' : 'process', { video, settings: job.settings, outputRoot: job.outputRoot, jobId: job.id, resumeFolder: job.folder }, job.id)
+    const trim=job.kind==='trim'
+    if (!download) requireLocalVideo(video)
+    const result = await worker.request(trim?'trim-video':download ? 'download-video' : 'process', { video, settings: job.settings, outputRoot: job.outputRoot, jobId: job.id, resumeFolder: job.folder,ranges:job.trimRanges,join:job.trimJoin }, job.id)
     if (download) {
-      video.downloadedPath = result.downloadPath; video.info = result.info; publicInfo(video)
+      video.downloadedPath = result.downloadPath; video.previewPath=undefined;video.previewSource=undefined;video.previewStatus=undefined;video.info = result.info; publicInfo(video)
       allowedPaths.add(path.resolve(result.downloadPath))
       delete result.info
     }
-    Object.assign(job, result, { status: 'done', stage: download ? '下载完成' : result.stage || '处理完成', progress: 100 })
+    if(trim)await addFiles(result.outputFiles,video.projectId,video.id)
+    Object.assign(job, result, { status: 'done', stage: trim?'剪切完成':download ? '下载完成' : result.stage || '处理完成', progress: 100 })
     allowedPaths.add(path.resolve(result.folder))
   } catch (error) {
     job.status = error instanceof WorkerFailure && error.cancelled ? 'cancelled' : 'error'
     job.stage = job.status === 'cancelled' ? '已取消' : job.kind === 'download' ? '下载失败' : '处理失败'
     job.error = error instanceof Error ? error.message : '处理失败。'
   } finally { busy = false; changed(); void pump() }
+}
+function queueDownload(video: VideoItem, root: string): boolean {
+  if (state.jobs.some(job => job.videoId === video.id && ['waiting', 'running'].includes(job.status))) return false
+  allowedPaths.add(root)
+  state.jobs.push({ id: randomUUID(), kind: 'download', videoId: video.id, name: video.name, status: 'waiting', stage: '等待下载', progress: 0, completed: 0, total: 0, createdAt: new Date().toISOString(), settings: { ...(video.override || state.settings) }, outputRoot: root })
+  state.paused = false
+  return true
 }
 function registerIPC() {
   const handle = (name: string, fn: (...args: any[]) => unknown) => ipcMain.handle(name, (event, ...args) => {
@@ -209,20 +247,53 @@ function registerIPC() {
     video.crop = value.crop; video.cropSegments = value.cropSegments; changed()
   })
   handle('resolve-links', async (text: string) => {
+    if (!state.health.ready) throw new Error(state.health.message)
     const projectId = state.activeProjectId || undefined
     if (typeof text !== 'string' || text.length > 30000) throw new Error('链接内容过长。')
     const links = [...new Set(text.match(/https?:\/\/[^\s<>"\u3000]+/g) || [])].slice(0, 50)
     if (!links.length) throw new Error('没有找到视频链接。')
+    const selected = await dialog.showOpenDialog(window!, { title: '选择视频下载保存位置', defaultPath: state.downloadRoot, properties: ['openDirectory', 'createDirectory'] })
+    if (selected.canceled || !selected.filePaths[0]) return { added: 0, ids: [], errors: [], queued: 0, reused: 0, cancelled: true }
+    const root = path.resolve(selected.filePaths[0])
+    state.downloadRoot = root
     let added = 0
+    let queued = 0, reused = 0
+    const ids: string[] = []
     const errors: string[] = []
     for (const link of links) {
       try {
-        const data = await worker.request('resolve', { text: link, settings: state.settings })
-        if (state.videos.some(v => v.source === 'online' && v.remoteId === data.remoteId && v.platform === data.platform)) continue
-        state.videos.push({ ...data, id: randomUUID(), source: 'online', status: 'ready', projectId: state.projects.some(project => project.id === projectId) ? projectId : undefined }); added++; changed()
+        const anonymousSettings={...state.settings,cookiePath:''}
+        let data
+        try { data=await worker.request('resolve',{text:link,settings:anonymousSettings}) }
+        catch(firstError) {
+          const detail=firstError instanceof Error?firstError.message:''
+          if(detail.includes('【链接类型】')||detail.includes('【视频不可用】')||detail.includes('没有找到视频链接')||detail.includes('当前支持'))throw firstError
+          const guestCookies=await anonymousCookies(link).catch(()=>[])
+          try {data=await worker.request('resolve',{text:link,settings:anonymousSettings,guestCookies})}
+          catch(anonymousError) {
+            if(!state.settings.cookiePath)throw anonymousError
+            data=await worker.request('resolve',{text:link,settings:state.settings})
+          }
+        }
+        const existing = state.videos.find(v => v.source === 'online' && v.remoteId === data.remoteId && v.platform === data.platform)
+        if (existing) {
+          if (ids.includes(existing.id)) continue
+          if (localVideoPath(existing)) reused++
+          else { existing.info=data.info; existing.publicShare=data.publicShare; if(queueDownload(existing,root))queued++ }
+          publicInfo(existing); ids.push(existing.id); continue
+        }
+        const id = randomUUID()
+        const video = publicInfo({ ...data, id, source: 'online', status: 'ready', extractRange:{start:0,end:null}, projectId: state.projects.some(project => project.id === projectId) ? projectId : undefined })
+        state.videos.push(video); queueDownload(video, root); queued++; ids.push(id); added++; changed()
       } catch (error) { errors.push(error instanceof Error ? error.message : '解析失败。') }
     }
-    return { added, errors }
+    for (const video of state.videos.filter(v => ids.includes(v.id))) {
+      const project = state.projects.find(p => p.id === video.projectId)
+      if (project) project.collapsed = false
+    }
+    changed()
+    void pump()
+    return { added, ids, errors, queued, reused }
   })
   handle('download-video', async (id: string) => {
     if (!state.health.ready) throw new Error(state.health.message)
@@ -233,10 +304,9 @@ function registerIPC() {
     if (result.canceled || !result.filePaths[0]) return false
     if (!state.videos.includes(video)) throw new Error('视频已从列表移除。')
     if (state.jobs.some(job => job.videoId === id && ['waiting', 'running'].includes(job.status))) throw new Error('这个视频已有待处理任务。')
-    state.downloadRoot = result.filePaths[0]
-    allowedPaths.add(path.resolve(state.downloadRoot))
-    state.jobs.push({ id: randomUUID(), kind: 'download', videoId: id, name: video.name, status: 'waiting', stage: '等待下载', progress: 0, completed: 0, total: 0, createdAt: new Date().toISOString(), settings: { ...(video.override || state.settings) }, outputRoot: state.downloadRoot })
-    state.paused = false; changed(); void pump(); return true
+    state.downloadRoot = path.resolve(result.filePaths[0])
+    queueDownload(video, state.downloadRoot)
+    changed(); void pump(); return true
   })
   handle('choose-output', async () => {
     const result = await dialog.showOpenDialog(window!, { title: '选择截图保存的根目录', defaultPath: state.outputRoot, properties: ['openDirectory', 'createDirectory'] })
@@ -248,13 +318,28 @@ function registerIPC() {
     return result.canceled ? null : result.filePaths[0]
   })
   handle('save-settings', (value: ExtractSettings) => { state.settings = settings(value); changed() })
+  handle('save-time-input-mode', (mode: string) => {
+    if (!['clock','milliseconds'].includes(mode)) throw new Error('时间输入方式无效。')
+    state.timeInputMode = mode as Snapshot['timeInputMode']; changed()
+  })
+  handle('set-extract-ranges', (ids:string[], range:{start:number;end:number|null}) => {
+    if (!Array.isArray(ids) || !ids.length || ids.length>500 || !range || !Number.isFinite(range.start) || range.start<0 || (range.end!==null&&(!Number.isFinite(range.end)||range.end<=range.start))) throw new Error('截取范围无效。')
+    const changes = [...new Set(ids)].map(id=>{
+      const video=state.videos.find(v=>v.id===id), duration=video?.info?.duration || 0
+      if(!video||range.start>=duration)throw new Error(`${video?.name || '视频'} 的起点超出时长，请调整后再应用。`)
+      return {video,range:{start:range.start,end:range.end===null?null:Math.min(range.end,duration)}}
+    })
+    for(const change of changes)change.video.extractRange=change.range
+    changed()
+  })
   handle('set-override', (id: string, value: ExtractSettings | null) => {
     const video = state.videos.find(v => v.id === id)
-    if (video) { video.override = value ? settings(value) : undefined; changed() }
+    if (video) { video.override = value ? settings(value) : undefined; if(video.override)video.extractRange={start:video.override.start,end:video.override.end}; changed() }
   })
   handle('enqueue', (ids: string[]) => {
     if (!state.health.ready) throw new Error(state.health.message)
     if (!Array.isArray(ids) || !ids.length) throw new Error('请先选择视频。')
+    for (const id of new Set(ids)) { const video=state.videos.find(v=>v.id===id); if(video)requireLocalVideo(video) }
     const estimate = spaceEstimate(state,ids)
     if (!estimate.sufficient) throw new Error('保存位置的可用空间不足，请减少图片数量、降低尺寸或更换保存位置。')
     for (const id of new Set(ids)) {
@@ -306,13 +391,15 @@ function registerIPC() {
     const job = state.jobs.find(j => j.id === id)
     if (!job?.manifest || !fs.existsSync(job.manifest)) return { frames: [], total: 0, sheets: [] }
     const data = JSON.parse(fs.readFileSync(job.manifest, 'utf-8'))
-    const start = Math.max(0, Math.floor(page || 0)) * 60
     const validFrame = (frame: any) => {
       if (typeof frame.path !== 'string') return false
       const relative = path.relative(path.resolve(job.folder!), path.resolve(frame.path))
       return !relative.startsWith('..') && !path.isAbsolute(relative) && /\.(jpg|png)$/i.test(frame.path)
     }
-    const frames = (data.frames || []).slice(start,start+60).filter(validFrame).filter((frame:any)=>fs.existsSync(frame.path))
+    const existingFrames=(data.frames || []).filter(validFrame).filter((frame:any)=>fs.existsSync(frame.path))
+    const currentPage=Math.max(0,Math.min(Math.floor(page||0),Math.ceil(existingFrames.length/60)-1))
+    const start=currentPage*60
+    const frames = existingFrames.slice(start,start+60)
     const sheetFiles = (data.sheets || []).filter((file:string) => typeof file==='string' && !path.relative(path.resolve(job.folder!),path.resolve(file)).startsWith('..') && fs.existsSync(file))
     const currentSheetPage=Math.max(0,Math.min(Math.floor(sheetPage||0),Math.ceil(sheetFiles.length/20)-1))
     const thumbnails = await worker.request('thumbnails',{files:[...frames.map((f:any)=>f.path),...sheetFiles.slice(currentSheetPage*20,currentSheetPage*20+20)]})
@@ -320,7 +407,8 @@ function registerIPC() {
     job.missing = (data.frames || []).filter((frame:any)=>!validFrame(frame)||!fs.existsSync(frame.path)).length
     return {
       frames: frames.map((frame:any)=>({ ...frame, url:asset(frame.path), thumbnailUrl:small.get(frame.path)?.thumbnail?asset(small.get(frame.path).thumbnail):undefined,width:small.get(frame.path)?.width,height:small.get(frame.path)?.height })),
-      total: data.frames?.length || 0,
+      total: existingFrames.length,
+      page:currentPage,
       sheetPage:currentSheetPage,
       missing: job.missing,
       notes: data.notes || {}, stitchDraft: migrateSettings(data.stitchDraft || job.settings),
@@ -381,14 +469,18 @@ function registerIPC() {
   })
   handle('clear-finished', () => { state.jobs = state.jobs.filter(j => ['running', 'waiting'].includes(j.status)); changed() })
   registerServices({handle,getState:()=>state,changed,getWindow:()=>window!,worker,settings,asset,allowed:allowedPaths,busy:()=>busy})
+  registerEditing({handle,state:()=>state,changed,window:()=>window!,worker,publicInfo,allowed:allowedPaths,pump:()=>void pump(),flushDrafts:async(ids)=>{await Promise.all(ids.map(id=>draftWrites.get(id)))}})
 }
 
 app.whenReady().then(async () => {
+  if(!ownsWorkspace)return
   const root = path.resolve(__dirname, '../..')
   const savedPath = path.join(app.getPath('userData'), 'workspace.json')
   let saved: Partial<Snapshot> = {}
   try { saved = JSON.parse(fs.readFileSync(savedPath, 'utf-8')) } catch {}
   state = {
+    closeAction:['ask','tray','quit'].includes(saved.closeAction||'')?saved.closeAction!:'ask',
+    timeInputMode:saved.timeInputMode==='milliseconds'?'milliseconds':'clock',
     viewport: (()=>{try{return viewport(saved.viewport || DEFAULT_VIEWPORT)}catch{return DEFAULT_VIEWPORT}})(), templates: saved.templates || [],
     projects: saved.projects || [], activeProjectId: saved.activeProjectId || null,
     downloadRoot: saved.downloadRoot || app.getPath('videos'),
@@ -397,8 +489,13 @@ app.whenReady().then(async () => {
     health: { ready: false, message: '正在启动处理引擎…' }
   }
   for (const video of state.videos) {
+    if(video.previewStatus==='preparing')video.previewStatus=undefined
     if (!state.projects.some(project => project.id === video.projectId)) video.projectId = undefined
     if (video.override) video.override = migrateSettings(video.override)
+    const oldRange = video.extractRange || video.override || state.settings
+    const duration = video.info?.duration || Infinity
+    const end = oldRange.end===null?null:Math.min(oldRange.end,duration)
+    video.extractRange = Number.isFinite(oldRange.start)&&oldRange.start>=0&&oldRange.start<duration&&(end===null||Number.isFinite(end)&&end>oldRange.start) ? {start:oldRange.start,end} : {start:0,end:null}
     if (video.status === 'reading') { video.status = 'error'; video.error = '上次读取已中断，请移除后重新添加。' }
     publicInfo(video)
   }
@@ -454,6 +551,32 @@ app.whenReady().then(async () => {
     webPreferences: { preload: path.join(__dirname, '../preload/index.js'), contextIsolation: true, sandbox: true, nodeIntegration: false, backgroundThrottling: !hidden }
   })
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  Menu.setApplicationMenu(null)
+  tray=new Tray(path.join(root,'assets/icon.png'))
+  tray.setToolTip('拾帧 · 视频抽帧与拼接')
+  const restore=()=>{window?.show();if(window?.isMinimized())window.restore();window?.focus()}
+  tray.on('double-click',restore);tray.on('click',restore)
+  tray.setContextMenu(Menu.buildFromTemplate([{label:'打开拾帧',click:restore},{label:'暂停 / 继续队列',click:()=>{state.paused=!state.paused;changed();if(!state.paused)void pump()}},{type:'separator'},{label:'退出拾帧',click:()=>app.quit()}]))
+  window.on('close',event=>{
+    if(quitting)return
+    if(state.closeAction==='quit'){event.preventDefault();app.quit();return}
+    event.preventDefault()
+    if(state.closeAction==='tray'){window?.hide();return}
+    if(closePrompt)return
+    closePrompt=true
+    void dialog.showMessageBox(window!,{type:'question',title:'关闭拾帧',message:'关闭窗口后如何处理？',detail:'隐藏到托盘后，下载、抽帧和剪切继续运行。退出会停止当前处理任务。',buttons:['隐藏到托盘','直接退出','取消'],defaultId:0,cancelId:2,checkboxLabel:'记住选择，可在设置中更改',checkboxChecked:true}).then(answer=>{
+      if(answer.response===2)return
+      if(answer.checkboxChecked){state.closeAction=answer.response===0?'tray':'quit';saveState();changed()}
+      if(answer.response===0)window?.hide();else app.quit()
+    }).finally(()=>{closePrompt=false})
+  })
+  const appMenu = Menu.buildFromTemplate([
+    {label:'编辑',submenu:[{role:'undo',label:'撤销'},{role:'redo',label:'重做'},{type:'separator'},{role:'cut',label:'剪切'},{role:'copy',label:'复制'},{role:'paste',label:'粘贴'},{role:'selectAll',label:'全选'}]},
+    {role:'togglefullscreen',label:'全屏'}, {role:'quit',label:'退出拾帧'}
+  ])
+  window.webContents.on('before-input-event', (event,input) => {
+    if(input.type==='keyDown' && input.key==='F2' && !input.control && !input.alt && !input.shift && !input.meta) {event.preventDefault();appMenu.popup({window})}
+  })
   window.webContents.on('will-navigate', (event) => event.preventDefault())
   if (!hidden) window.once('ready-to-show', () => window?.show())
   if (process.env.ELECTRON_RENDERER_URL && !app.isPackaged) await window.loadURL(process.env.ELECTRON_RENDERER_URL)

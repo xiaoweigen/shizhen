@@ -1,0 +1,1153 @@
+{
+  "version": "0.7.1",
+  "date": "2026-10-04",
+  "backendTests": 94,
+  "timeChecks": 38,
+  "desktopRegression": [
+    {
+      "result": "passed",
+      "version": "0.7.1",
+      "packaged": false,
+      "online": false,
+      "checks": [
+        "native import bridge",
+        "batch deduplication",
+        "metadata",
+        "project creation import move rename and folding",
+        "project persistence",
+        "long press project drag drop empty folders hover expand and Escape",
+        "video and project pinning persistence",
+        "search videos and empty results",
+        "single batch project removal cancellation confirmations",
+        "bottom completed progress and jump to specific job",
+        "settings controls",
+        "real frame extraction",
+        "separate output folders",
+        "automatic paged stitching",
+        "image protocol",
+        "selected-image stitching",
+        "six-grid and nine-grid presets",
+        "Chinese multiline storyboard notes",
+        "trimmed empty bottom rows and horizontal blanks",
+        "visible note height and font",
+        "automatic equal row note height without scrolling",
+        "long press drag selection and deselection",
+        "single page export and all-frames batch export",
+        "existing sheet recipe editing",
+        "visual crop gestures pixel settings and exact extracted pixels",
+        "custom rows columns and canvas dimensions",
+        "notes persistence and disabling",
+        "compact layout",
+        "state restoration"
+      ]
+    },
+    {
+      "result": "passed",
+      "version": "0.7.1",
+      "packaged": true,
+      "online": false,
+      "checks": [
+        "native import bridge",
+        "batch deduplication",
+        "metadata",
+        "project creation import move rename and folding",
+        "project persistence",
+        "long press project drag drop empty folders hover expand and Escape",
+        "video and project pinning persistence",
+        "search videos and empty results",
+        "single batch project removal cancellation confirmations",
+        "bottom completed progress and jump to specific job",
+        "settings controls",
+        "real frame extraction",
+        "separate output folders",
+        "automatic paged stitching",
+        "image protocol",
+        "selected-image stitching",
+        "six-grid and nine-grid presets",
+        "Chinese multiline storyboard notes",
+        "trimmed empty bottom rows and horizontal blanks",
+        "visible note height and font",
+        "automatic equal row note height without scrolling",
+        "long press drag selection and deselection",
+        "single page export and all-frames batch export",
+        "existing sheet recipe editing",
+        "visual crop gestures pixel settings and exact extracted pixels",
+        "custom rows columns and canvas dimensions",
+        "notes persistence and disabling",
+        "compact layout",
+        "state restoration"
+      ]
+    }
+  ],
+  "uxWorkflows": [
+    {
+      "version": "0.7.1",
+      "packaged": false,
+      "cases": [
+        {
+          "name": "批量导入不勾选，最新视频自动预览且范围完整",
+          "status": "passed",
+          "evidence": {
+            "unchecked": true,
+            "latestPreview": true,
+            "fullDuration": true
+          }
+        },
+        {
+          "name": "每个视频单独保存范围，共用参数不会覆盖范围",
+          "status": "passed",
+          "evidence": {
+            "independent": true,
+            "sharedInterval": true
+          }
+        },
+        {
+          "name": "新增素材不继承短选区、不改变已有批量勾选",
+          "status": "passed",
+          "evidence": {
+            "existingSelectionPreserved": true,
+            "newUnchecked": true,
+            "newFullRange": true
+          }
+        },
+        {
+          "name": "统一范围需要明确应用，取消时不改变其他视频",
+          "status": "passed",
+          "evidence": {
+            "explicitApply": true,
+            "cancelSafe": true
+          }
+        },
+        {
+          "name": "抽帧当前视频忽略其他勾选，仅产生一个任务",
+          "status": "passed",
+          "evidence": {
+            "oneTask": true,
+            "ignoredOtherChecks": true,
+            "frames": 6
+          }
+        },
+        {
+          "name": "批量抽帧只处理勾选素材，不包含正在预览的视频",
+          "status": "passed",
+          "evidence": {
+            "twoCheckedTasks": true,
+            "previewExcluded": true
+          }
+        },
+        {
+          "name": "绿色手柄拖动即时更新，松开后保存并同步真实画面",
+          "status": "passed",
+          "evidence": {
+            "instantVisual": true,
+            "commitOnRelease": true,
+            "realFrameSynced": true
+          }
+        },
+        {
+          "name": "黄色播放线不修改范围，绿色色块整体移动范围",
+          "status": "passed",
+          "evidence": {
+            "playheadIndependent": true,
+            "spanPreserved": true
+          }
+        },
+        {
+          "name": "窄选区手柄可分别点中，播放线贴合轨道，时间轴可放大还原",
+          "status": "passed",
+          "evidence": {
+            "separateHitTargets": true,
+            "indicatorsOnRail": true,
+            "zoom": true,
+            "restore": true
+          }
+        },
+        {
+          "name": "常规与紧凑窗口时间轴布局核对，无控件越界或标签拆散",
+          "status": "passed",
+          "evidence": {
+            "containedControls": true,
+            "groupedRangeFields": true,
+            "requestedWindowWidths": [
+              1440,
+              1280,
+              1024
+            ],
+            "measuredViewportSizes": [
+              {
+                "width": 1424,
+                "height": 881
+              },
+              {
+                "width": 1264,
+                "height": 681
+              },
+              {
+                "width": 1104,
+                "height": 681
+              }
+            ]
+          }
+        },
+        {
+          "name": "毫秒输入与换算、校验及裁剪窗口共用输入模式",
+          "status": "passed",
+          "evidence": {
+            "milliseconds": true,
+            "conversion": true,
+            "invalidRejected": true,
+            "cropFullRange": true,
+            "modeShared": true
+          }
+        },
+        {
+          "name": "部分删除同步清理备注、配方与索引，保留其他结果",
+          "status": "passed",
+          "evidence": {
+            "frameRemoved": true,
+            "noteRemoved": true,
+            "registryClean": true,
+            "recipeClean": true,
+            "otherResultsPreserved": true
+          }
+        },
+        {
+          "name": "删除失败保留文件及记录，成功项仍同步清理",
+          "status": "passed",
+          "evidence": {
+            "failurePreserved": true,
+            "successCleaned": true,
+            "errorReported": true
+          }
+        },
+        {
+          "name": "全部结果删除后关闭窗口、移除任务，原视频与其他文件保留",
+          "status": "passed",
+          "evidence": {
+            "taskRemoved": true,
+            "manifestRemoved": true,
+            "indexRemoved": true,
+            "windowClosed": true,
+            "unrelatedPreserved": true,
+            "originalUnchanged": true
+          }
+        },
+        {
+          "name": "删除最后一页后自动返回有效页，编辑器刷新且不复活旧备注",
+          "status": "passed",
+          "evidence": {
+            "pageClamped": true,
+            "editorRefreshed": true,
+            "deletedReferencesAbsent": true
+          }
+        },
+        {
+          "name": "范围应用边界检查，无效批量操作不产生部分修改",
+          "status": "passed",
+          "evidence": {
+            "endClamped": true,
+            "atomicValidation": true
+          }
+        },
+        {
+          "name": "共享图片及归档任务同步清理，恢复归档不会复活删除结果",
+          "status": "passed",
+          "evidence": {
+            "sharedRecordsCleaned": true,
+            "archiveCleaned": true,
+            "noDeletedResultRestoration": true
+          }
+        },
+        {
+          "name": "取消下载文件夹不解析、不新增视频或任务",
+          "status": "passed",
+          "evidence": {
+            "noMutation": true,
+            "noDownload": true
+          }
+        },
+        {
+          "name": "实际在线视频解析自动下载至选择位置，直接播放且不生成预览缓存",
+          "status": "passed",
+          "evidence": {
+            "anonymous": true,
+            "userFolder": true,
+            "nativePlayback": true,
+            "noAutoConversion": true,
+            "codec": "h264",
+            "quality": 1080
+          }
+        },
+        {
+          "name": "同一链接复用已下载视频，不重复创建任务或文件",
+          "status": "passed",
+          "evidence": {
+            "reused": true,
+            "noDuplicateTask": true,
+            "noDuplicateFile": true
+          }
+        },
+        {
+          "name": "在线视频抽帧复用保存文件，源文件缺失时禁止偷偷下载",
+          "status": "passed",
+          "evidence": {
+            "savedFileReused": true,
+            "threeFrames": true,
+            "missingFileBlocked": true,
+            "sourceUnchanged": true
+          }
+        },
+        {
+          "name": "播放失败不自动转码，只有手动兼容预览才生成副本",
+          "status": "passed",
+          "evidence": {
+            "noAutoConversion": true,
+            "manualConversion": true,
+            "originalUnchanged": true,
+            "extractionUsesOriginal": true
+          }
+        },
+        {
+          "name": "重启保留各视频范围和毫秒模式，不自动勾选素材",
+          "status": "passed",
+          "evidence": {
+            "rangePersistence": true,
+            "modePersistence": true,
+            "uncheckedAfterRestart": true,
+            "rendererErrors": 0,
+            "sourceUnchanged": true
+          }
+        }
+      ],
+      "errors": [],
+      "originalUnchanged": true
+    },
+    {
+      "version": "0.7.1",
+      "packaged": true,
+      "cases": [
+        {
+          "name": "批量导入不勾选，最新视频自动预览且范围完整",
+          "status": "passed",
+          "evidence": {
+            "unchecked": true,
+            "latestPreview": true,
+            "fullDuration": true
+          }
+        },
+        {
+          "name": "每个视频单独保存范围，共用参数不会覆盖范围",
+          "status": "passed",
+          "evidence": {
+            "independent": true,
+            "sharedInterval": true
+          }
+        },
+        {
+          "name": "新增素材不继承短选区、不改变已有批量勾选",
+          "status": "passed",
+          "evidence": {
+            "existingSelectionPreserved": true,
+            "newUnchecked": true,
+            "newFullRange": true
+          }
+        },
+        {
+          "name": "统一范围需要明确应用，取消时不改变其他视频",
+          "status": "passed",
+          "evidence": {
+            "explicitApply": true,
+            "cancelSafe": true
+          }
+        },
+        {
+          "name": "抽帧当前视频忽略其他勾选，仅产生一个任务",
+          "status": "passed",
+          "evidence": {
+            "oneTask": true,
+            "ignoredOtherChecks": true,
+            "frames": 6
+          }
+        },
+        {
+          "name": "批量抽帧只处理勾选素材，不包含正在预览的视频",
+          "status": "passed",
+          "evidence": {
+            "twoCheckedTasks": true,
+            "previewExcluded": true
+          }
+        },
+        {
+          "name": "绿色手柄拖动即时更新，松开后保存并同步真实画面",
+          "status": "passed",
+          "evidence": {
+            "instantVisual": true,
+            "commitOnRelease": true,
+            "realFrameSynced": true
+          }
+        },
+        {
+          "name": "黄色播放线不修改范围，绿色色块整体移动范围",
+          "status": "passed",
+          "evidence": {
+            "playheadIndependent": true,
+            "spanPreserved": true
+          }
+        },
+        {
+          "name": "窄选区手柄可分别点中，播放线贴合轨道，时间轴可放大还原",
+          "status": "passed",
+          "evidence": {
+            "separateHitTargets": true,
+            "indicatorsOnRail": true,
+            "zoom": true,
+            "restore": true
+          }
+        },
+        {
+          "name": "常规与紧凑窗口时间轴布局核对，无控件越界或标签拆散",
+          "status": "passed",
+          "evidence": {
+            "containedControls": true,
+            "groupedRangeFields": true,
+            "requestedWindowWidths": [
+              1440,
+              1280,
+              1024
+            ],
+            "measuredViewportSizes": [
+              {
+                "width": 1424,
+                "height": 881
+              },
+              {
+                "width": 1264,
+                "height": 681
+              },
+              {
+                "width": 1104,
+                "height": 681
+              }
+            ]
+          }
+        },
+        {
+          "name": "毫秒输入与换算、校验及裁剪窗口共用输入模式",
+          "status": "passed",
+          "evidence": {
+            "milliseconds": true,
+            "conversion": true,
+            "invalidRejected": true,
+            "cropFullRange": true,
+            "modeShared": true
+          }
+        },
+        {
+          "name": "部分删除同步清理备注、配方与索引，保留其他结果",
+          "status": "passed",
+          "evidence": {
+            "frameRemoved": true,
+            "noteRemoved": true,
+            "registryClean": true,
+            "recipeClean": true,
+            "otherResultsPreserved": true
+          }
+        },
+        {
+          "name": "删除失败保留文件及记录，成功项仍同步清理",
+          "status": "passed",
+          "evidence": {
+            "failurePreserved": true,
+            "successCleaned": true,
+            "errorReported": true
+          }
+        },
+        {
+          "name": "全部结果删除后关闭窗口、移除任务，原视频与其他文件保留",
+          "status": "passed",
+          "evidence": {
+            "taskRemoved": true,
+            "manifestRemoved": true,
+            "indexRemoved": true,
+            "windowClosed": true,
+            "unrelatedPreserved": true,
+            "originalUnchanged": true
+          }
+        },
+        {
+          "name": "删除最后一页后自动返回有效页，编辑器刷新且不复活旧备注",
+          "status": "passed",
+          "evidence": {
+            "pageClamped": true,
+            "editorRefreshed": true,
+            "deletedReferencesAbsent": true
+          }
+        },
+        {
+          "name": "范围应用边界检查，无效批量操作不产生部分修改",
+          "status": "passed",
+          "evidence": {
+            "endClamped": true,
+            "atomicValidation": true
+          }
+        },
+        {
+          "name": "共享图片及归档任务同步清理，恢复归档不会复活删除结果",
+          "status": "passed",
+          "evidence": {
+            "sharedRecordsCleaned": true,
+            "archiveCleaned": true,
+            "noDeletedResultRestoration": true
+          }
+        },
+        {
+          "name": "取消下载文件夹不解析、不新增视频或任务",
+          "status": "passed",
+          "evidence": {
+            "noMutation": true,
+            "noDownload": true
+          }
+        },
+        {
+          "name": "实际在线视频解析自动下载至选择位置，直接播放且不生成预览缓存",
+          "status": "passed",
+          "evidence": {
+            "anonymous": true,
+            "userFolder": true,
+            "nativePlayback": true,
+            "noAutoConversion": true,
+            "codec": "h264",
+            "quality": 1080
+          }
+        },
+        {
+          "name": "同一链接复用已下载视频，不重复创建任务或文件",
+          "status": "passed",
+          "evidence": {
+            "reused": true,
+            "noDuplicateTask": true,
+            "noDuplicateFile": true
+          }
+        },
+        {
+          "name": "在线视频抽帧复用保存文件，源文件缺失时禁止偷偷下载",
+          "status": "passed",
+          "evidence": {
+            "savedFileReused": true,
+            "threeFrames": true,
+            "missingFileBlocked": true,
+            "sourceUnchanged": true
+          }
+        },
+        {
+          "name": "播放失败不自动转码，只有手动兼容预览才生成副本",
+          "status": "passed",
+          "evidence": {
+            "noAutoConversion": true,
+            "manualConversion": true,
+            "originalUnchanged": true,
+            "extractionUsesOriginal": true
+          }
+        },
+        {
+          "name": "重启保留各视频范围和毫秒模式，不自动勾选素材",
+          "status": "passed",
+          "evidence": {
+            "rangePersistence": true,
+            "modePersistence": true,
+            "uncheckedAfterRestart": true,
+            "rendererErrors": 0,
+            "sourceUnchanged": true
+          }
+        }
+      ],
+      "errors": [],
+      "originalUnchanged": true
+    }
+  ],
+  "videoWorkflows": [
+    {
+      "version": "0.7.1",
+      "packaged": false,
+      "cases": [
+        {
+          "name": "真实本地视频导入、视频画面解码与播放",
+          "status": "passed",
+          "evidence": {
+            "decoded": true,
+            "playing": true
+          }
+        },
+        {
+          "name": "下拉操作菜单、默认关闭剪切与默认展开时间轴",
+          "status": "passed",
+          "evidence": {
+            "trimOffByDefault": true,
+            "dropdown": true,
+            "timelineExpanded": true,
+            "collapsible": true
+          }
+        },
+        {
+          "name": "时分秒输入、毫秒范围和无效时间提示",
+          "status": "passed",
+          "evidence": {
+            "formatted": true,
+            "milliseconds": true,
+            "invalidRejected": true
+          }
+        },
+        {
+          "name": "截取时间轴拖动同步真实播放位置和画面",
+          "status": "passed",
+          "evidence": {
+            "seeked": true,
+            "frameChanged": true
+          }
+        },
+        {
+          "name": "裁剪播放、时间轴、时段格式及区域保存",
+          "status": "passed",
+          "evidence": {
+            "playing": true,
+            "seeked": true,
+            "range": [
+              0.5,
+              3.5
+            ],
+            "width": 360
+          }
+        },
+        {
+          "name": "按可视范围抽帧、裁剪和查看器回归",
+          "status": "passed",
+          "evidence": {
+            "frames": 4,
+            "croppedWidth": 360,
+            "viewer": true
+          }
+        },
+        {
+          "name": "剪切输入和模式切换可撤销",
+          "status": "passed",
+          "evidence": {
+            "timeUndo": true,
+            "modeUndo": true
+          }
+        },
+        {
+          "name": "移除中间区段并确认拼接，原视频完整",
+          "status": "passed",
+          "evidence": {
+            "joined": true,
+            "newListItem": true,
+            "duration": 35.933333
+          }
+        },
+        {
+          "name": "选择不拼接后分段保存并加入列表",
+          "status": "passed",
+          "evidence": {
+            "files": 2,
+            "newListItems": true
+          }
+        },
+        {
+          "name": "所在文件夹通过系统定位接口打开",
+          "status": "passed",
+          "evidence": {
+            "systemFolderInterface": true
+          }
+        },
+        {
+          "name": "真实删除剪切副本，红字确认且保留原视频和记录",
+          "status": "passed",
+          "evidence": {
+            "removedFromDisk": true,
+            "sourceUnchanged": true,
+            "recordRetained": true
+          }
+        },
+        {
+          "name": "只删除所选截图，其他导出文件和记录保留",
+          "status": "passed",
+          "evidence": {
+            "oneImageDeleted": true,
+            "unrelatedPreserved": true,
+            "resultCountUpdated": true
+          }
+        },
+        {
+          "name": "首次关闭选择托盘，隐藏后队列继续并可恢复窗口",
+          "status": "passed",
+          "evidence": {
+            "prompt": true,
+            "hidden": true,
+            "queueCompleted": true,
+            "restored": true
+          }
+        },
+        {
+          "name": "取消关闭不隐藏、重复启动恢复托盘中的窗口",
+          "status": "passed",
+          "evidence": {
+            "cancelKeepsWindow": true,
+            "duplicateExits": true,
+            "existingRestored": true
+          }
+        },
+        {
+          "name": "托盘偏好、重启恢复及退出行为",
+          "status": "passed",
+          "evidence": {
+            "remembered": true,
+            "quitExits": true
+          }
+        },
+        {
+          "name": "原视频和私人数据隔离核对",
+          "status": "passed",
+          "evidence": {
+            "originalUnchanged": true,
+            "rendererErrors": 0
+          }
+        }
+      ],
+      "errors": [],
+      "originalUnchanged": true
+    },
+    {
+      "version": "0.7.1",
+      "packaged": true,
+      "cases": [
+        {
+          "name": "真实本地视频导入、视频画面解码与播放",
+          "status": "passed",
+          "evidence": {
+            "decoded": true,
+            "playing": true
+          }
+        },
+        {
+          "name": "下拉操作菜单、默认关闭剪切与默认展开时间轴",
+          "status": "passed",
+          "evidence": {
+            "trimOffByDefault": true,
+            "dropdown": true,
+            "timelineExpanded": true,
+            "collapsible": true
+          }
+        },
+        {
+          "name": "时分秒输入、毫秒范围和无效时间提示",
+          "status": "passed",
+          "evidence": {
+            "formatted": true,
+            "milliseconds": true,
+            "invalidRejected": true
+          }
+        },
+        {
+          "name": "截取时间轴拖动同步真实播放位置和画面",
+          "status": "passed",
+          "evidence": {
+            "seeked": true,
+            "frameChanged": true
+          }
+        },
+        {
+          "name": "裁剪播放、时间轴、时段格式及区域保存",
+          "status": "passed",
+          "evidence": {
+            "playing": true,
+            "seeked": true,
+            "range": [
+              0.5,
+              3.5
+            ],
+            "width": 360
+          }
+        },
+        {
+          "name": "按可视范围抽帧、裁剪和查看器回归",
+          "status": "passed",
+          "evidence": {
+            "frames": 4,
+            "croppedWidth": 360,
+            "viewer": true
+          }
+        },
+        {
+          "name": "剪切输入和模式切换可撤销",
+          "status": "passed",
+          "evidence": {
+            "timeUndo": true,
+            "modeUndo": true
+          }
+        },
+        {
+          "name": "移除中间区段并确认拼接，原视频完整",
+          "status": "passed",
+          "evidence": {
+            "joined": true,
+            "newListItem": true,
+            "duration": 35.933333
+          }
+        },
+        {
+          "name": "选择不拼接后分段保存并加入列表",
+          "status": "passed",
+          "evidence": {
+            "files": 2,
+            "newListItems": true
+          }
+        },
+        {
+          "name": "所在文件夹通过系统定位接口打开",
+          "status": "passed",
+          "evidence": {
+            "systemFolderInterface": true
+          }
+        },
+        {
+          "name": "真实删除剪切副本，红字确认且保留原视频和记录",
+          "status": "passed",
+          "evidence": {
+            "removedFromDisk": true,
+            "sourceUnchanged": true,
+            "recordRetained": true
+          }
+        },
+        {
+          "name": "只删除所选截图，其他导出文件和记录保留",
+          "status": "passed",
+          "evidence": {
+            "oneImageDeleted": true,
+            "unrelatedPreserved": true,
+            "resultCountUpdated": true
+          }
+        },
+        {
+          "name": "首次关闭选择托盘，隐藏后队列继续并可恢复窗口",
+          "status": "passed",
+          "evidence": {
+            "prompt": true,
+            "hidden": true,
+            "queueCompleted": true,
+            "restored": true
+          }
+        },
+        {
+          "name": "取消关闭不隐藏、重复启动恢复托盘中的窗口",
+          "status": "passed",
+          "evidence": {
+            "cancelKeepsWindow": true,
+            "duplicateExits": true,
+            "existingRestored": true
+          }
+        },
+        {
+          "name": "托盘偏好、重启恢复及退出行为",
+          "status": "passed",
+          "evidence": {
+            "remembered": true,
+            "quitExits": true
+          }
+        },
+        {
+          "name": "原视频和私人数据隔离核对",
+          "status": "passed",
+          "evidence": {
+            "originalUnchanged": true,
+            "rendererErrors": 0
+          }
+        }
+      ],
+      "errors": [],
+      "originalUnchanged": true
+    }
+  ],
+  "interactionRegression": {
+    "version": "0.7.1",
+    "packaged": true,
+    "cases": [
+      {
+        "name": "Alt 不显示原生菜单，F2 打开应用菜单",
+        "status": "passed",
+        "evidence": {
+          "altMenu": false,
+          "f2OpenedAndClosed": true
+        }
+      },
+      {
+        "name": "已有真实本地视频导入和元信息",
+        "status": "passed",
+        "evidence": {
+          "width": 720,
+          "height": 1280,
+          "codec": "h264"
+        }
+      },
+      {
+        "name": "裁剪窗口首次打开即可快捷键缩放和滚轮缩放",
+        "status": "passed",
+        "evidence": {
+          "canvasOnly": true
+        }
+      },
+      {
+        "name": "裁剪空格拖动、中键拖动不会改变裁剪区域",
+        "status": "passed",
+        "evidence": {
+          "space": true,
+          "middle": true,
+          "longPress": true,
+          "rectUnchanged": true
+        }
+      },
+      {
+        "name": "组合键录制支持两个普通按键和多个修饰键",
+        "status": "passed",
+        "evidence": {
+          "zoomIn": "KeyQ+KeyW",
+          "zoomOut": "Control+Shift+KeyX"
+        }
+      },
+      {
+        "name": "抽帧、命名、处理队列结果显示",
+        "status": "passed",
+        "evidence": {
+          "frames": 15,
+          "naming": "0.5s.png",
+          "progress": 100
+        }
+      },
+      {
+        "name": "结果弹窗双击原图后组合键、滚轮、拖动、Esc 正常",
+        "status": "passed",
+        "evidence": {
+          "nestedModal": true,
+          "customCombination": true,
+          "spacePan": true,
+          "escapeClosesOnlyViewer": true
+        }
+      },
+      {
+        "name": "拼接编辑缩放、空格拖动和焦点边线",
+        "status": "passed",
+        "evidence": {
+          "outline": "none",
+          "shadow": "none"
+        }
+      },
+      {
+        "name": "画面序号启用、四角定位、拖动保存",
+        "status": "passed",
+        "evidence": {
+          "draggable": true,
+          "saved": true,
+          "fourCorners": true
+        }
+      },
+      {
+        "name": "生成当前拼图并验证宫格显示与每行数量",
+        "status": "passed",
+        "evidence": {
+          "columns": 4,
+          "recipeRestored": true
+        }
+      },
+      {
+        "name": "备注高度、字号和未填满最后一页的底部高度",
+        "status": "passed",
+        "evidence": {
+          "minHeight": 160,
+          "fontSize": 28,
+          "autoGrow": true
+        }
+      },
+      {
+        "name": "已有拼接图查看器不会操作背后的编辑器",
+        "status": "passed",
+        "evidence": {
+          "scopeIsolated": true
+        }
+      },
+      {
+        "name": "偏好与原始视频保存完整",
+        "status": "passed",
+        "evidence": {
+          "sourceUnchanged": true,
+          "settingsPersisted": true,
+          "rendererErrors": 0
+        }
+      }
+    ],
+    "errors": [],
+    "originalUnchanged": true
+  },
+  "recoveryRegression": {
+    "version": "0.7.1",
+    "packaged": true,
+    "cases": [
+      {
+        "name": "超过20张拼图的分页、小图和第21张独立编辑",
+        "status": "passed",
+        "seconds": 13.509,
+        "details": {
+          "sheets": 29,
+          "firstPage": 20,
+          "secondPage": 9,
+          "editedFrame": "2.1s.png"
+        }
+      },
+      {
+        "name": "已保存裁剪和故事板模板应用与居中比例",
+        "status": "passed",
+        "seconds": 32.217,
+        "details": {
+          "cropPreset": true,
+          "centeredSquare": true,
+          "storyTemplate": true
+        }
+      },
+      {
+        "name": "场景抽帧与相似帧筛选的设置和真实导出",
+        "status": "passed",
+        "seconds": 14.547,
+        "details": {
+          "scenes": [
+            "0s.png",
+            "1s.png",
+            "2s.png"
+          ],
+          "deduplicated": 3,
+          "targets": 29
+        }
+      },
+      {
+        "name": "结果移动后备份中的备注、顺序和拼接配方恢复",
+        "status": "passed",
+        "seconds": 0.177,
+        "details": {
+          "frames": 29,
+          "recipes": 29,
+          "notesRecovered": true,
+          "orderRecovered": true
+        }
+      },
+      {
+        "name": "损坏备份拒绝导入并保留当前工作区，结果路径越界拒绝",
+        "status": "passed",
+        "seconds": 0.029,
+        "details": {
+          "invalidBackupRejected": true,
+          "currentWorkspacePreserved": true,
+          "traversalRejected": true
+        }
+      }
+    ],
+    "errors": []
+  },
+  "frozenHdr": {
+    "result": "passed",
+    "version": "0.7.1",
+    "packagedWorker": true,
+    "generatedStandardSamples": true,
+    "cases": [
+      {
+        "transfer": "smpte2084",
+        "mode": "auto",
+        "status": "passed",
+        "meanChannelDifference": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "seconds": 0.219
+      },
+      {
+        "transfer": "smpte2084",
+        "mode": "hable",
+        "status": "passed",
+        "meanChannelDifference": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "seconds": 0.281
+      },
+      {
+        "transfer": "smpte2084",
+        "mode": "reinhard",
+        "status": "passed",
+        "meanChannelDifference": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "seconds": 0.234
+      },
+      {
+        "transfer": "smpte2084",
+        "mode": "off",
+        "status": "passed",
+        "meanChannelDifference": [
+          0.20041666666666666,
+          0.10152777777777777,
+          0.33770833333333333
+        ],
+        "seconds": 0.156
+      },
+      {
+        "transfer": "arib-std-b67",
+        "mode": "auto",
+        "status": "passed",
+        "meanChannelDifference": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "seconds": 0.235
+      },
+      {
+        "transfer": "arib-std-b67",
+        "mode": "hable",
+        "status": "passed",
+        "meanChannelDifference": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "seconds": 0.234
+      },
+      {
+        "transfer": "arib-std-b67",
+        "mode": "reinhard",
+        "status": "passed",
+        "meanChannelDifference": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "seconds": 0.219
+      },
+      {
+        "transfer": "arib-std-b67",
+        "mode": "off",
+        "status": "passed",
+        "meanChannelDifference": [
+          0.3715277777777778,
+          0.15527777777777776,
+          0.5709722222222222
+        ],
+        "seconds": 0.172
+      }
+    ]
+  },
+  "finalStartupAfterCleanup": {
+    "status": "passed",
+    "enginesReady": true,
+    "originalUnchanged": true
+  }
+}

@@ -126,7 +126,7 @@ def test_hdr_mapping_matches_independent_ffmpeg_reference(processor,parameters,t
         result=run(processor,source,{**parameters,'hdrMode':mode},tmp_path/mode)
         assert result['count']==1
         record=manifest(result)['frames'][0]
-        reference=tmp_path/f'ref-{mode}.png'
+        reference=tmp_path/f'ref-{mode}.bmp'
         vf='format=rgb24' if mode=='off' else 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap='+('hable' if mode=='auto' else mode)+':desat=2,zscale=t=bt709:m=bt709:r=full,format=yuv444p,format=rgb24'
         subprocess.run([str(ROOT/'.tools/ffmpeg.exe'),'-hide_banner','-loglevel','error','-y','-i',str(source),'-ss',str(record['actual']),'-vf',vf,'-frames:v','1',str(reference)],check=True,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
         with Image.open(record['path']) as saved,Image.open(reference) as expected:
@@ -135,7 +135,7 @@ def test_hdr_mapping_matches_independent_ffmpeg_reference(processor,parameters,t
     with Image.open(manifest(run(processor,source,{**parameters,'hdrMode':'auto'},tmp_path/'auto','reuse'))['frames'][0]['path']) as auto,Image.open(manifest(run(processor,source,{**parameters,'hdrMode':'off'},tmp_path/'off','reuse'))['frames'][0]['path']) as off:
         assert max(ImageStat.Stat(ImageChops.difference(auto,off)).mean)>5
 
-@pytest.mark.parametrize('detail,category', [('Fresh cookies are needed','访问状态'),('HTTP Error 403: Forbidden','访问状态'),('getaddrinfo failed','网络'),('Connection timed out','网络'),('HTTP Error 404','视频不可用'),('Unsupported URL','链接类型'),('Unable to extract title','解析器')])
+@pytest.mark.parametrize('detail,category', [('Fresh cookies are needed','访客访问限制'),('HTTP Error 403: Forbidden','访问状态'),('getaddrinfo failed','网络'),('Connection timed out','网络'),('HTTP Error 404','视频不可用'),('Unsupported URL','链接类型'),('Unable to extract title','解析器')])
 def test_online_error_categories(detail,category):
     from core import online_diagnostic
     assert '【'+category+'】' in online_diagnostic(detail)

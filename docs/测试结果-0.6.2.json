@@ -1,0 +1,229 @@
+{
+  "version": "0.6.2",
+  "date": "2026-10-03",
+  "backendTests": 70,
+  "desktopRegressionGroups": 29,
+  "runs": [
+    {
+      "suite": "user-fixes",
+      "packaged": false,
+      "cases": [
+        {
+          "name": "Alt 不显示原生菜单，F2 打开应用菜单",
+          "status": "passed"
+        },
+        {
+          "name": "已有真实本地视频导入和元信息",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪窗口首次打开即可快捷键缩放和滚轮缩放",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪空格拖动、中键拖动不会改变裁剪区域",
+          "status": "passed"
+        },
+        {
+          "name": "组合键录制支持两个普通按键和多个修饰键",
+          "status": "passed"
+        },
+        {
+          "name": "抽帧、命名、处理队列结果显示",
+          "status": "passed"
+        },
+        {
+          "name": "结果弹窗双击原图后组合键、滚轮、拖动、Esc 正常",
+          "status": "passed"
+        },
+        {
+          "name": "拼接编辑缩放、空格拖动和焦点边线",
+          "status": "passed"
+        },
+        {
+          "name": "画面序号启用、四角定位、拖动保存",
+          "status": "passed"
+        },
+        {
+          "name": "生成当前拼图并验证宫格显示与每行数量",
+          "status": "passed"
+        },
+        {
+          "name": "备注高度、字号和未填满最后一页的底部高度",
+          "status": "passed"
+        },
+        {
+          "name": "已有拼接图查看器不会操作背后的编辑器",
+          "status": "passed"
+        },
+        {
+          "name": "在线链接完整提示、匿名解析与自动选中预览",
+          "status": "passed"
+        },
+        {
+          "name": "匿名在线视频下载、元信息核验与抽帧",
+          "status": "passed"
+        },
+        {
+          "name": "偏好与原始视频保存完整",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "user-fixes",
+      "packaged": true,
+      "cases": [
+        {
+          "name": "Alt 不显示原生菜单，F2 打开应用菜单",
+          "status": "passed"
+        },
+        {
+          "name": "已有真实本地视频导入和元信息",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪窗口首次打开即可快捷键缩放和滚轮缩放",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪空格拖动、中键拖动不会改变裁剪区域",
+          "status": "passed"
+        },
+        {
+          "name": "组合键录制支持两个普通按键和多个修饰键",
+          "status": "passed"
+        },
+        {
+          "name": "抽帧、命名、处理队列结果显示",
+          "status": "passed"
+        },
+        {
+          "name": "结果弹窗双击原图后组合键、滚轮、拖动、Esc 正常",
+          "status": "passed"
+        },
+        {
+          "name": "拼接编辑缩放、空格拖动和焦点边线",
+          "status": "passed"
+        },
+        {
+          "name": "画面序号启用、四角定位、拖动保存",
+          "status": "passed"
+        },
+        {
+          "name": "生成当前拼图并验证宫格显示与每行数量",
+          "status": "passed"
+        },
+        {
+          "name": "备注高度、字号和未填满最后一页的底部高度",
+          "status": "passed"
+        },
+        {
+          "name": "已有拼接图查看器不会操作背后的编辑器",
+          "status": "passed"
+        },
+        {
+          "name": "在线链接完整提示、匿名解析与自动选中预览",
+          "status": "passed"
+        },
+        {
+          "name": "匿名在线视频下载、元信息核验与抽帧",
+          "status": "passed"
+        },
+        {
+          "name": "偏好与原始视频保存完整",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "full-tool",
+      "packaged": true,
+      "cases": [
+        {
+          "name": "真实本地视频：单个导入、编码信息、预览与去重",
+          "status": "passed"
+        },
+        {
+          "name": "真实本地视频：全长0.5秒PNG抽帧、九宫格分页与底部进度",
+          "status": "passed"
+        },
+        {
+          "name": "真实PNG逐张像素与原视频实际时间核对（75张）",
+          "status": "passed"
+        },
+        {
+          "name": "真实结果：60张分页、图片加载、单页拼接与备注保存",
+          "status": "passed"
+        },
+        {
+          "name": "已验证截图重复导出：不修改原图片",
+          "status": "passed"
+        },
+        {
+          "name": "参数冲突提示与另存一批；JPG、范围、起点、缩放",
+          "status": "passed"
+        },
+        {
+          "name": "覆盖模式：更新缩放结果，保留其他用户文件",
+          "status": "passed"
+        },
+        {
+          "name": "独立裁剪跟随公共间隔；重置裁剪与单独参数",
+          "status": "passed"
+        },
+        {
+          "name": "输入边界：非法时间、越界裁剪与错误链接",
+          "status": "passed"
+        },
+        {
+          "name": "错误文件导入：缺失文件与损坏视频显示错误且不生成输出",
+          "status": "passed"
+        },
+        {
+          "name": "真实Bilibili：页面链接解析、Cookie文件选择保护与独立下载入口",
+          "status": "passed"
+        },
+        {
+          "name": "在线视频下载：取消位置选择不会创建任务",
+          "status": "passed"
+        },
+        {
+          "name": "真实Bilibili完整视频下载到用户位置，核验编码与清理缓存",
+          "status": "passed"
+        },
+        {
+          "name": "再次下载保留已有视频；打开视频与文件夹入口",
+          "status": "passed"
+        },
+        {
+          "name": "真实Bilibili全长2秒抽帧，复用下载视频",
+          "status": "passed"
+        },
+        {
+          "name": "队列控制：暂停等待、禁止删除活动视频、取消与重试保留截图",
+          "status": "passed"
+        },
+        {
+          "name": "移除确认：取消、单项确认、批量确认与项目确认，文件保留",
+          "status": "passed"
+        },
+        {
+          "name": "重启恢复：项目置顶、视频置顶、折叠、设置、下载路径和结果记录",
+          "status": "passed"
+        },
+        {
+          "name": "清除队列确认：取消保留记录、确认清除后文件仍在",
+          "status": "passed"
+        },
+        {
+          "name": "原视频完整性、界面异常与测试隔离",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "originalUnchanged": true,
+  "douyinRealSampleTested": false,
+  "cleanWindowsInstallTested": false
+}

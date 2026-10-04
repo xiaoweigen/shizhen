@@ -45,10 +45,10 @@ try:
             begin = time.monotonic()
             result = request('process', {'jobId': transfer + '-' + mode, 'video': {'id': transfer, 'source': 'local', 'path': str(source), 'name': transfer}, 'settings': {**settings, 'hdrMode': mode}, 'outputRoot': str(ARTIFACT / mode)})
             record = json.loads(Path(result['manifest']).read_text(encoding='utf-8'))['frames'][0]
-            reference = ARTIFACT / f'reference-{transfer}-{mode}.png'
+            reference = ARTIFACT / f'reference-{transfer}-{mode}.rgb'
             vf = 'format=rgb24' if mode == 'off' else 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=' + ('hable' if mode == 'auto' else mode) + ':desat=2,zscale=t=bt709:m=bt709:r=full,format=yuv444p,format=rgb24'
-            subprocess.run([str(TOOLS / 'ffmpeg.exe'), '-hide_banner', '-loglevel', 'error', '-y', '-i', str(source), '-ss', str(record['actual']), '-vf', vf, '-frames:v', '1', str(reference)], check=True, creationflags=FLAGS)
-            with Image.open(record['path']) as saved, Image.open(reference) as expected:
+            subprocess.run([str(TOOLS / 'ffmpeg.exe'), '-hide_banner', '-loglevel', 'error', '-y', '-i', str(source), '-ss', str(record['actual']), '-vf', vf, '-frames:v', '1', '-c:v', 'rawvideo', '-f', 'rawvideo', str(reference)], check=True, creationflags=FLAGS)
+            with Image.open(record['path']) as saved, Image.frombytes('RGB',(160,90),reference.read_bytes()) as expected:
                 differences = ImageStat.Stat(ImageChops.difference(saved, expected)).mean
                 assert saved.mode == 'RGB' and saved.size == (160, 90) and max(differences) < 1
             cases.append({'transfer': transfer, 'mode': mode, 'status': 'passed', 'meanChannelDifference': differences, 'seconds': round(time.monotonic() - begin, 3)})

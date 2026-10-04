@@ -1,7 +1,7 @@
 {
   "name": "framepick",
   "productName": "拾帧",
-  "version": "0.6.1",
+  "version": "0.7.1",
   "description": "本地视频按时间抽帧与图片拼接工具",
   "author": "xiaoweigen",
   "private": true,
@@ -39,7 +39,7 @@
     "productName": "拾帧",
     "electronDist": "node_modules/electron/dist",
     "directories": {
-      "output": "release/0.6.1"
+      "output": "release/0.7.1"
     },
     "files": [
       "out/**/*",

@@ -11,8 +11,8 @@ VIDEO = {'source': 'online', 'url': 'https://www.bilibili.com/video/sample', 'na
 
 
 def fake_download(processor, source, monkeypatch):
-    def download(video, settings, cancel, emit):
-        folder = processor.cache / 'downloads' / uuid.uuid4().hex
+    def download(video, settings, cancel, emit, output_root=None):
+        folder = Path(output_root) / ('.framepick-download-' + uuid.uuid4().hex) if output_root else processor.cache / 'downloads' / uuid.uuid4().hex
         folder.mkdir(parents=True)
         file = folder / ('video' + source.suffix)
         shutil.copyfile(source, file)
@@ -78,3 +78,39 @@ def test_extraction_uses_previously_downloaded_video_without_download_or_cleanup
     result = processor.process({**VIDEO, 'downloadedPath': str(fixtures['cfr'])}, parameters, tmp_path / '截图', threading.Event(), lambda event: None, 'saved-video')
     assert result['count'] == 3 and fixtures['cfr'].is_file()
     assert len(list(Path(result['folder']).glob('*.png'))) == 3
+
+
+@pytest.mark.parametrize('saved', [None, 'missing.mp4'])
+def test_missing_saved_video_never_downloads_during_extraction(processor, parameters, tmp_path, monkeypatch, saved):
+    monkeypatch.setattr(processor, 'download', lambda *a, **kw: pytest.fail('Unexpected network download'))
+    video = {**VIDEO, 'downloadedPath': str(tmp_path / saved) if saved else None}
+    with pytest.raises(ProcessingError, match='不会自动重新下载'):
+        processor.process(video, parameters, tmp_path / 'output', threading.Event(), lambda event: None, 'missing')
+    assert not (tmp_path / 'output').exists()
+
+
+def test_download_assembly_uses_user_folder_and_cleans_failure(processor, parameters, tmp_path, monkeypatch):
+    output = tmp_path / 'chosen'; output.mkdir()
+    other = output / 'user.txt'; other.write_text('preserve')
+    def run(args, *a, **kw):
+        destination = Path(args[args.index('-o') + 1])
+        assert destination.parent.parent == output
+        assert destination.parent.name.startswith('.framepick-download-')
+        (destination.parent / 'video.part').write_bytes(b'partial')
+        raise ProcessingError('download failed')
+    monkeypatch.setattr(processor, 'run', run)
+    with pytest.raises(ProcessingError, match='download failed'):
+        processor.download_video(VIDEO, parameters, output, threading.Event(), lambda event: None)
+    assert list(output.iterdir()) == [other]
+    assert not (processor.cache / 'downloads').exists()
+
+
+def test_download_prefers_native_codec_after_resolution_and_keeps_quality_limit(processor, parameters, tmp_path, monkeypatch):
+    def run(args,*a,**kw):
+        assert args[args.index('-S')+1]=='res,+vcodec:avc,+acodec:m4a'
+        selection=args[args.index('-f')+1]
+        assert 'height<=720' in selection and not selection.endswith('/best')
+        raise ProcessingError('checked')
+    monkeypatch.setattr(processor,'run',run)
+    with pytest.raises(ProcessingError,match='checked'):
+        processor.download_video(VIDEO,{**parameters,'onlineQuality':720},tmp_path/'output',threading.Event(),lambda e:None)

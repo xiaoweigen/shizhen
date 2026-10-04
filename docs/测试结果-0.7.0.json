@@ -1,0 +1,384 @@
+{
+  "version": "0.7.0",
+  "date": "2026-10-03",
+  "backendTests": 86,
+  "desktopRegression": [
+    {
+      "packaged": false,
+      "result": "passed",
+      "checks": [
+        "native import bridge",
+        "batch deduplication",
+        "metadata",
+        "project creation import move rename and folding",
+        "project persistence",
+        "long press project drag drop empty folders hover expand and Escape",
+        "video and project pinning persistence",
+        "search videos and empty results",
+        "single batch project removal cancellation confirmations",
+        "bottom completed progress and jump to specific job",
+        "settings controls",
+        "real frame extraction",
+        "separate output folders",
+        "automatic paged stitching",
+        "image protocol",
+        "selected-image stitching",
+        "six-grid and nine-grid presets",
+        "Chinese multiline storyboard notes",
+        "trimmed empty bottom rows and horizontal blanks",
+        "visible note height and font",
+        "automatic equal row note height without scrolling",
+        "long press drag selection and deselection",
+        "single page export and all-frames batch export",
+        "existing sheet recipe editing",
+        "visual crop gestures pixel settings and exact extracted pixels",
+        "custom rows columns and canvas dimensions",
+        "notes persistence and disabling",
+        "compact layout",
+        "state restoration"
+      ]
+    },
+    {
+      "packaged": true,
+      "result": "passed",
+      "checks": [
+        "native import bridge",
+        "batch deduplication",
+        "metadata",
+        "project creation import move rename and folding",
+        "project persistence",
+        "long press project drag drop empty folders hover expand and Escape",
+        "video and project pinning persistence",
+        "search videos and empty results",
+        "single batch project removal cancellation confirmations",
+        "bottom completed progress and jump to specific job",
+        "settings controls",
+        "real frame extraction",
+        "separate output folders",
+        "automatic paged stitching",
+        "image protocol",
+        "selected-image stitching",
+        "six-grid and nine-grid presets",
+        "Chinese multiline storyboard notes",
+        "trimmed empty bottom rows and horizontal blanks",
+        "visible note height and font",
+        "automatic equal row note height without scrolling",
+        "long press drag selection and deselection",
+        "single page export and all-frames batch export",
+        "existing sheet recipe editing",
+        "visual crop gestures pixel settings and exact extracted pixels",
+        "custom rows columns and canvas dimensions",
+        "notes persistence and disabling",
+        "compact layout",
+        "state restoration"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "suite": "new-workflows-developed",
+      "packaged": false,
+      "cases": [
+        {
+          "name": "真实本地视频导入、视频画面解码与播放",
+          "status": "passed"
+        },
+        {
+          "name": "下拉操作菜单、默认关闭剪切与默认展开时间轴",
+          "status": "passed"
+        },
+        {
+          "name": "时分秒输入、毫秒范围和无效时间提示",
+          "status": "passed"
+        },
+        {
+          "name": "截取时间轴拖动同步真实播放位置和画面",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪播放、时间轴、时段格式及区域保存",
+          "status": "passed"
+        },
+        {
+          "name": "按可视范围抽帧、裁剪和查看器回归",
+          "status": "passed"
+        },
+        {
+          "name": "剪切输入和模式切换可撤销",
+          "status": "passed"
+        },
+        {
+          "name": "移除中间区段并确认拼接，原视频完整",
+          "status": "passed"
+        },
+        {
+          "name": "选择不拼接后分段保存并加入列表",
+          "status": "passed"
+        },
+        {
+          "name": "所在文件夹通过系统定位接口打开",
+          "status": "passed"
+        },
+        {
+          "name": "真实删除剪切副本，红字确认且保留原视频和记录",
+          "status": "passed"
+        },
+        {
+          "name": "只删除所选截图，其他导出文件和记录保留",
+          "status": "passed"
+        },
+        {
+          "name": "首次关闭选择托盘，隐藏后队列继续并可恢复窗口",
+          "status": "passed"
+        },
+        {
+          "name": "取消关闭不隐藏、重复启动恢复托盘中的窗口",
+          "status": "passed"
+        },
+        {
+          "name": "托盘偏好、重启恢复及退出行为",
+          "status": "passed"
+        },
+        {
+          "name": "原视频和私人数据隔离核对",
+          "status": "passed"
+        }
+      ],
+      "rendererErrorCount": 0,
+      "originalUnchanged": true
+    },
+    {
+      "suite": "new-workflows-packaged",
+      "packaged": true,
+      "cases": [
+        {
+          "name": "真实本地视频导入、视频画面解码与播放",
+          "status": "passed"
+        },
+        {
+          "name": "下拉操作菜单、默认关闭剪切与默认展开时间轴",
+          "status": "passed"
+        },
+        {
+          "name": "时分秒输入、毫秒范围和无效时间提示",
+          "status": "passed"
+        },
+        {
+          "name": "截取时间轴拖动同步真实播放位置和画面",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪播放、时间轴、时段格式及区域保存",
+          "status": "passed"
+        },
+        {
+          "name": "按可视范围抽帧、裁剪和查看器回归",
+          "status": "passed"
+        },
+        {
+          "name": "剪切输入和模式切换可撤销",
+          "status": "passed"
+        },
+        {
+          "name": "移除中间区段并确认拼接，原视频完整",
+          "status": "passed"
+        },
+        {
+          "name": "选择不拼接后分段保存并加入列表",
+          "status": "passed"
+        },
+        {
+          "name": "所在文件夹通过系统定位接口打开",
+          "status": "passed"
+        },
+        {
+          "name": "真实删除剪切副本，红字确认且保留原视频和记录",
+          "status": "passed"
+        },
+        {
+          "name": "只删除所选截图，其他导出文件和记录保留",
+          "status": "passed"
+        },
+        {
+          "name": "在线视频未独立下载也可真正预览播放和拖动",
+          "status": "passed"
+        },
+        {
+          "name": "在线视频预览缓存可明确删除，不误删其他文件",
+          "status": "passed"
+        },
+        {
+          "name": "首次关闭选择托盘，隐藏后队列继续并可恢复窗口",
+          "status": "passed"
+        },
+        {
+          "name": "取消关闭不隐藏、重复启动恢复托盘中的窗口",
+          "status": "passed"
+        },
+        {
+          "name": "托盘偏好、重启恢复及退出行为",
+          "status": "passed"
+        },
+        {
+          "name": "原视频和私人数据隔离核对",
+          "status": "passed"
+        }
+      ],
+      "rendererErrorCount": 0,
+      "originalUnchanged": true
+    },
+    {
+      "suite": "previous-interactions",
+      "packaged": false,
+      "cases": [
+        {
+          "name": "Alt 不显示原生菜单，F2 打开应用菜单",
+          "status": "passed"
+        },
+        {
+          "name": "已有真实本地视频导入和元信息",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪窗口首次打开即可快捷键缩放和滚轮缩放",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪空格拖动、中键拖动不会改变裁剪区域",
+          "status": "passed"
+        },
+        {
+          "name": "组合键录制支持两个普通按键和多个修饰键",
+          "status": "passed"
+        },
+        {
+          "name": "抽帧、命名、处理队列结果显示",
+          "status": "passed"
+        },
+        {
+          "name": "结果弹窗双击原图后组合键、滚轮、拖动、Esc 正常",
+          "status": "passed"
+        },
+        {
+          "name": "拼接编辑缩放、空格拖动和焦点边线",
+          "status": "passed"
+        },
+        {
+          "name": "画面序号启用、四角定位、拖动保存",
+          "status": "passed"
+        },
+        {
+          "name": "生成当前拼图并验证宫格显示与每行数量",
+          "status": "passed"
+        },
+        {
+          "name": "备注高度、字号和未填满最后一页的底部高度",
+          "status": "passed"
+        },
+        {
+          "name": "已有拼接图查看器不会操作背后的编辑器",
+          "status": "passed"
+        },
+        {
+          "name": "偏好与原始视频保存完整",
+          "status": "passed"
+        }
+      ],
+      "rendererErrorCount": 0,
+      "originalUnchanged": true
+    },
+    {
+      "suite": "previous-interactions",
+      "packaged": true,
+      "cases": [
+        {
+          "name": "Alt 不显示原生菜单，F2 打开应用菜单",
+          "status": "passed"
+        },
+        {
+          "name": "已有真实本地视频导入和元信息",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪窗口首次打开即可快捷键缩放和滚轮缩放",
+          "status": "passed"
+        },
+        {
+          "name": "裁剪空格拖动、中键拖动不会改变裁剪区域",
+          "status": "passed"
+        },
+        {
+          "name": "组合键录制支持两个普通按键和多个修饰键",
+          "status": "passed"
+        },
+        {
+          "name": "抽帧、命名、处理队列结果显示",
+          "status": "passed"
+        },
+        {
+          "name": "结果弹窗双击原图后组合键、滚轮、拖动、Esc 正常",
+          "status": "passed"
+        },
+        {
+          "name": "拼接编辑缩放、空格拖动和焦点边线",
+          "status": "passed"
+        },
+        {
+          "name": "画面序号启用、四角定位、拖动保存",
+          "status": "passed"
+        },
+        {
+          "name": "生成当前拼图并验证宫格显示与每行数量",
+          "status": "passed"
+        },
+        {
+          "name": "备注高度、字号和未填满最后一页的底部高度",
+          "status": "passed"
+        },
+        {
+          "name": "已有拼接图查看器不会操作背后的编辑器",
+          "status": "passed"
+        },
+        {
+          "name": "在线链接完整提示、匿名解析与自动选中预览",
+          "status": "passed"
+        },
+        {
+          "name": "匿名在线视频下载、元信息核验与抽帧",
+          "status": "failed"
+        }
+      ],
+      "rendererErrorCount": 0,
+      "originalUnchanged": true
+    },
+    {
+      "suite": "online-retry",
+      "packaged": true,
+      "cases": [
+        {
+          "name": "网络失败后重试独立下载及核验元信息",
+          "status": "passed"
+        },
+        {
+          "name": "独立下载后复用保存视频抽帧",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "persistence-after-retry",
+      "packaged": true,
+      "cases": [
+        {
+          "name": "组合键与宫格偏好重启恢复，原始视频完整",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "一次独立下载提示网络错误，任务重试后下载、元信息核验与抽帧通过。",
+    "真实样本的名称、路径、链接、文件摘要和原始异常堆栈均未公开。"
+  ],
+  "timeFormatChecks": 26
+}

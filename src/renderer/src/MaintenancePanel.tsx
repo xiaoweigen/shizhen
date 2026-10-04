@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Alert, App as AntApp, Button, Modal, Tag } from 'antd'
+import { Alert, App as AntApp, Button, Modal, Tag,Select } from 'antd'
 import type { Snapshot } from '../../shared/types'
 export default function MaintenancePanel({state,close}:{state:Snapshot;close():void}) {
   const {modal}=AntApp.useApp()
@@ -7,6 +7,7 @@ export default function MaintenancePanel({state,close}:{state:Snapshot;close():v
   async function run(fn:()=>Promise<unknown>,text:string){setBusy(true);setError('');setNotice('');try{const result=await fn();if(result!==false)setNotice(text)}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
   return <Modal open title="设置与维护" width={660} onCancel={()=>{if(!busy)close()}} footer={<Button onClick={close} disabled={busy}>完成</Button>} keyboard={!busy}>
     {error&&<Alert showIcon type="error" title={error}/>} {notice&&<Alert showIcon type="success" title={notice}/>}
+    <section className="maintenance-section"><h3>关闭窗口与托盘</h3><p>隐藏到托盘时队列继续运行。点击托盘图标重新打开，右键可暂停队列或退出。</p><Select aria-label="关闭窗口方式" value={state.closeAction} style={{width:'100%'}} options={[{value:'ask',label:'关闭时询问'},{value:'tray',label:'隐藏到托盘 · 继续后台处理'},{value:'quit',label:'直接退出 · 停止处理'}]} onChange={value=>void run(()=>window.framepick.setCloseAction(value),'关闭窗口方式已保存')}/></section>
     <section className="maintenance-section"><h3>结果恢复</h3><p>选择具体视频的输出文件夹，可恢复截图、备注和已生成拼接图。归档只整理队列记录，文件会保留。</p><div><Button loading={busy} onClick={()=>void run(()=>window.framepick.importResults(),'已恢复结果，可到处理队列查看')}>重新导入结果</Button><Button disabled={busy} onClick={()=>void run(()=>window.framepick.restoreArchives(),'归档记录已恢复')}>恢复归档记录</Button></div></section>
     <section className="maintenance-section"><h3>工作区备份</h3><p>备份项目、视频引用、参数、快捷键、模板和结果备注；视频与图片需要另行复制。Cookie 文件与访问状态路径不会写入备份。导入会合并项目，并保留导入前备份。</p><div><Button disabled={busy} onClick={()=>void run(()=>window.framepick.exportWorkspace(),'工作区备份已保存')}>导出工作区备份</Button><Button disabled={busy} onClick={()=>void run(()=>window.framepick.importWorkspace(),'备份已导入；失效素材可在预览区重新定位')}>导入工作区备份</Button></div></section>
     <section className="maintenance-section"><h3>在线解析器</h3><p>从官方发布检查更新，下载后校验完整性及版本，再启用。需要队列空闲；失败时保留原版本。</p>{decoder&&<p>当前 <Tag>{decoder.version}</Tag>官方版本 <Tag>{decoder.latest}</Tag>{!decoder.updateAvailable&&'已是当前官方版本'}</p>}<div><Button disabled={busy} onClick={()=>void run(async()=>setDecoder(await window.framepick.decoderStatus()),'已完成版本检查')}>检查解析器更新</Button><Button disabled={busy||!decoder?.updateAvailable} onClick={()=>void run(async()=>{await window.framepick.updateDecoder();setDecoder(await window.framepick.decoderStatus())},'解析器已更新')}>更新解析器</Button><Button disabled={busy||!decoder?.canRollback} onClick={()=>void run(async()=>{await window.framepick.rollbackDecoder();setDecoder(await window.framepick.decoderStatus())},'已回退到更新前版本')}>回退解析器</Button></div></section>

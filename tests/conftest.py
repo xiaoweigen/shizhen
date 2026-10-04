@@ -20,7 +20,7 @@ def fixtures(tmp_path_factory):
     run(['-f', 'lavfi', '-i', 'testsrc2=duration=2:size=320x180:rate=10', '-c:v', 'ffv1', str(cfr)])
     images = []
     for index, color in enumerate(['red', 'green', 'blue', 'yellow']):
-        file = folder / f'{index}.png'
+        file = folder / f'{index}.bmp'
         Image.new('RGB', (160, 90), color).save(file)
         images.append(file)
     concat = folder / 'concat.txt'
