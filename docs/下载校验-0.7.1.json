@@ -1,0 +1,58 @@
+{
+  "version": "0.7.1",
+  "date": "2026-10-04",
+  "githubRelease": "https://github.com/xiaoweigen/shizhen/releases/tag/v0.7.1",
+  "giteeRelease": "https://gitee.com/llwwgg1/shizhen/releases/tag/v0.7.1",
+  "assets": [
+    {
+      "name": "Framepick-Setup-0.7.1.exe",
+      "bytes": 200473405,
+      "sha256": "48e54b974dc16625779bb71435a9e451daff689e671af8ef22bc838effd52b8d"
+    },
+    {
+      "name": "Framepick-Portable-0.7.1.zip",
+      "bytes": 272206173,
+      "sha256": "29ddb2079d8394c5c606caa6b942516be4cc8cee78d17c49bf228559833030c2"
+    },
+    {
+      "name": "Framepick-Source-0.7.1.zip",
+      "bytes": 4733815,
+      "sha256": "a835971b284b7ca5e21acfc5328bbc9ef44b4f7cdb0047e34a11404ad3532c15"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 283,
+      "sha256": "cfdcc842788ba56b919a681271ba42644637dbcbf6c4820964049818df01d171"
+    }
+  ],
+  "anonymousDownloadVerified": true,
+  "portableFilesIdenticalToTestedProgram": 711,
+  "downloadedProgram": {
+    "casesPassed": 23,
+    "originalVideoUnchanged": true,
+    "rendererErrors": 0
+  },
+  "downloadedSource": {
+    "sourceFiles": 154,
+    "commandsPassed": [
+      "npm ci",
+      "npm run setup",
+      "npm run build",
+      "npm run test:desktop",
+      "npm run test:backend",
+      "node scripts/test_time.cjs"
+    ],
+    "desktopGroups": 29,
+    "backendTests": 94,
+    "timeChecks": 38
+  },
+  "oldVersions": {
+    "githubReleaseId": 401864847,
+    "giteeReleaseId": 1180612,
+    "tag": "v0.6.1",
+    "commit": "93dfd5636a62ef67c536083ce62657cb8e6d9b2f",
+    "githubAssetsUnchanged": 5,
+    "forcedPush": false
+  },
+  "scope": "Existing Windows x64 host; anonymous downloads, exact file comparison, real authorized video workflow and fresh source dependency setup/build. Clean Windows interactive installation and a second computer remain untested."
+}

@@ -27,7 +27,7 @@
 
 最终用户无需安装 Node.js、Python 或 FFmpeg。开发可下载 [0.7.1 源码快照](https://github.com/xiaoweigen/shizhen/releases/download/v0.7.1/Framepick-Source-0.7.1.zip) 或 [v0.7.1 标签源码](https://github.com/xiaoweigen/shizhen/archive/refs/tags/v0.7.1.zip)。main 分支继续保存后续文档与验证记录；固定版本标签用于重现和回滚。运行工具包用于源码开发，对应第三方源材料包用于核对和重建；普通使用只需选择安装版或免安装版。
 
-本次功能、打包程序与隐私检查见 [0.7.1 测试报告](docs/测试报告-0.7.1.md)；以前的下载验收记录见 [发布验证 0.6.1](docs/发布验证-0.6.1.md)。
+本次实际下载、源码构建和使用验收见 [发布验证 0.7.1](docs/发布验证-0.7.1.md)，完整功能与隐私检查见 [0.7.1 测试报告](docs/测试报告-0.7.1.md)。旧版记录见 [发布验证 0.6.1](docs/发布验证-0.6.1.md)。
 
 ## 能做什么
 
