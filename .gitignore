@@ -12,3 +12,10 @@ __pycache__/
 *.spec
 build/
 .publish/
+.planning/
+.venv-audio/
+*.egg-info/
+audio-tool/
+本地整理记录.md
+存档备份/
+启动拾帧.lnk

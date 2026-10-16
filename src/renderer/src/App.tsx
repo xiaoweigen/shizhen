@@ -19,6 +19,7 @@ import { ViewportContext, keyChord, topDialog } from './useViewport'
 import InteractionSettings from './InteractionSettings'
 import ImageViewer, { type ViewImage } from './ImageViewer'
 import MaintenancePanel from './MaintenancePanel'
+import { version as appVersion } from '../../../package.json'
 
 const bridge = window.framepick
 const initial: Snapshot = { closeAction:'ask', viewport: DEFAULT_VIEWPORT, templates: [], projects: [], activeProjectId: null, downloadRoot: '', videos: [], jobs: [], settings: DEFAULT_SETTINGS, outputRoot: '', paused: false, health: { ready: false, message: '正在连接处理引擎…' } }
@@ -195,7 +196,7 @@ export default function App() {
       <button className={'nav-item ' + (view === 'help' ? 'active' : '')} onClick={() => setView('help')}><Icon name="help" />使用说明</button>
       <button className="nav-item" onClick={() => setInteractionOpen(true)}><Icon name="settings" />画面操作快捷键</button>
       <button className="nav-item" onClick={()=>setMaintenanceOpen(true)}><Icon name="folder"/>设置与维护</button>
-      <div className="nav-bottom"><div className="local-note"><Icon name="shield" size={18} /><div>本地处理<span>视频与截图留在你的电脑</span></div></div><div className="version">拾帧 0.7.1 <span title="F2 打开应用菜单">Windows · F2 菜单</span></div></div>
+      <div className="nav-bottom"><div className="local-note"><Icon name="shield" size={18} /><div>本地处理<span>视频与截图留在你的电脑</span></div></div><div className="version">拾帧 {appVersion} <span title="F2 打开应用菜单">Windows · F2 菜单</span></div></div>
     </aside>
     <main className="main-shell">
       <header className="page-header"><div><div className="eyebrow">VIDEO TO FRAMES</div><h1>{view === 'workspace' ? '把视频，变成每一帧灵感。' : view === 'queue' ? '处理队列' : '使用说明'}</h1><p>{view === 'workspace' ? '选择时间间隔，批量提取画面，再拼成故事板。' : view === 'queue' ? '查看处理进度、重试任务与打开导出结果。' : '从导入到导出，所有操作都在本地完成。'}</p></div><div className={'engine-status ' + (state.health.ready ? 'ready' : '')}><span />{state.health.message}</div></header>

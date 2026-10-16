@@ -1,0 +1,11 @@
+{
+  "version": "0.7.2",
+  "sourceArchiveEntries": 129,
+  "unpackedFilesScanned": 711,
+  "embeddedCodeObjectsScanned": 38739,
+  "privateLiteralFindings": 0,
+  "commonSecretPatternFindings": 0,
+  "screenshotMetadataFilesChecked": 4,
+  "installerPayloadFilesIdentical": 711,
+  "scope": "Source ZIP, complete unpacked program, compressed Python code filenames/constants and installer; supplied private references and common source credential patterns only. Screenshots also require visual review."
+}

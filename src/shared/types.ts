@@ -23,6 +23,7 @@ export type SpaceEstimate = { frames: number; minBytes: number; maxBytes: number
 export type StoryTemplate = { id: string; name: string; settings: ExtractSettings }
 export type ExtractSettings = {
   interval: number; start: number; end: number | null; includeStart: boolean;
+  times?: number[]; // Absolute integer milliseconds; authoritative when supplied by a file/API workflow.
   format: 'jpg' | 'png'; quality: number; maxWidth: number | null;
   conflict: 'skip' | 'overwrite' | 'batch'; autoStitch: boolean;
   layout: 'grid' | 'horizontal' | 'vertical'; rows: number; columns: number; perSheet: number;

@@ -85,6 +85,15 @@ def time_name(milliseconds: int, image_format='jpg'):
     return f'{text}s.{image_format}'
 
 def target_times(duration, settings):
+    if 'times' in settings:
+        values = settings['times']
+        if not isinstance(values, list) or not values or len(values) > MAX_FRAMES:
+            raise ProcessingError(f'times 必须为非空整数毫秒列表，最多 {MAX_FRAMES:,} 个。')
+        if not isinstance(duration, (int, float)) or not math.isfinite(duration) or duration <= 0:
+            raise ProcessingError('媒体时长无效，不能核验指定抽帧时间。')
+        if any(isinstance(value, bool) or not isinstance(value, int) or value < 0 or value >= duration * 1000 for value in values):
+            raise ProcessingError('times 只接受视频范围 [0, 时长) 内的整数毫秒，不能包含负数、浮点数或无效值。')
+        return sorted(set(values))
     step = float(settings['interval'])
     start = float(settings.get('start', 0))
     end = min(float(duration), float(settings['end']) if settings.get('end') is not None else float(duration))
@@ -667,7 +676,7 @@ class Processor:
             info = self.probe(source_path)
             emit({'info': info, 'stage': '准备抽帧'})
             validated_segments(settings, info['duration'])
-            targets = self.scene_times(source_path,info,settings,cancel,emit) if settings.get('sampling') == 'scene' else target_times(info['duration'], settings)
+            targets = self.scene_times(source_path,info,settings,cancel,emit) if settings.get('sampling') == 'scene' and 'times' not in settings else target_times(info['duration'], settings)
             if info['hdr'] and settings.get('hdrMode','auto') != 'off':
                 mapper = ToneMapper(self, info, 'hable' if settings.get('hdrMode','auto') == 'auto' else settings['hdrMode'], cancel)
             image_format = settings.get('format', 'jpg')
@@ -678,6 +687,7 @@ class Processor:
             manifest = folder / '任务记录' / (job_id + '.json')
             emit({'stage': '抽取图片', 'folder': str(folder), 'manifest': str(manifest), 'total': len(targets), 'completed': 0})
             image_options = {key: settings.get(key) for key in ('interval', 'start', 'end', 'includeStart', 'format', 'quality', 'maxWidth')}
+            if 'times' in settings: image_options['times'] = targets
             if settings.get('crop'): image_options['crop'] = settings['crop']
             if settings.get('cropSegments'): image_options['cropSegments'] = settings['cropSegments']
             if settings.get('sampling') == 'scene': image_options.update(sampling='scene',sceneThreshold=settings.get('sceneThreshold',18))

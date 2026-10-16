@@ -4,15 +4,16 @@
 
 ## ⬇ 下载 · Assets
 
-[![下载 Windows 安装版](assets/download-installer.svg)](https://github.com/xiaoweigen/shizhen/releases/download/v0.7.1/Framepick-Setup-0.7.1.exe)
-[![下载 Windows 免安装版](assets/download-portable.svg)](https://github.com/xiaoweigen/shizhen/releases/download/v0.7.1/Framepick-Portable-0.7.1.zip)
+[![下载 Windows 安装版](assets/download-installer.svg)](https://github.com/xiaoweigen/shizhen/releases/download/v0.7.2/Framepick-Setup-0.7.2.exe)
+[![下载 Windows 免安装版](assets/download-portable.svg)](https://github.com/xiaoweigen/shizhen/releases/download/v0.7.2/Framepick-Portable-0.7.2.zip)
 
-**当前版本：0.7.1 · Windows 64 位。** 安装版运行后选择安装位置；免安装版完整解压后运行 `拾帧.exe`。两种版本都无需另装 Node.js、Python 或 FFmpeg。
+**当前版本：0.7.2 · Windows 64 位。** 安装版运行后选择安装位置；免安装版完整解压后运行 `拾帧.exe`。两种版本都无需另装 Node.js、Python 或 FFmpeg。
 
-[全部下载文件（Assets）](https://github.com/xiaoweigen/shizhen/releases/tag/v0.7.1) · [历史版本](https://github.com/xiaoweigen/shizhen/releases) · [更新记录](CHANGELOG.md)
+[全部下载文件（Assets）](https://github.com/xiaoweigen/shizhen/releases/tag/v0.7.2) · [历史版本](https://github.com/xiaoweigen/shizhen/releases) · [更新记录](CHANGELOG.md)
 
 ## 主要功能
 
+- **指定时刻与采样计划**：源码CLI支持整数毫秒时刻列表和带媒体哈希的计划JSON，按真实PTS抽帧，无需打开窗口。
 - **按时间抽帧**：支持 0.5 秒、1 秒、2 秒等自定义间隔，选择截取范围，导出 JPG 或 PNG。图片按抽帧时间命名，每个视频保存到独立文件夹。
 - **画面裁剪与视频剪切**：在播放预览中选择时间和画面区域，为不同时段设置不同裁剪区域。可保留或删除多个片段，选择拼接或分别保存副本。
 - **拼图与故事板**：自选图片，使用六宫格、九宫格或自定义行列布局；添加逐图备注、文字样式和画面序号，导出单张或多张拼图。
@@ -83,7 +84,7 @@ node scripts/test_time.cjs
 npm run package:win
 ```
 
-打包文件位于 `release/0.7.1`。技术栈为 Electron、React、Ant Design、Python、PyAV、Pillow、FFmpeg 和 yt-dlp。固定版本源码可从对应发行页下载；第三方工具的来源和重建方法见 [二进制与源材料](docs/二进制发布准备.md)。
+打包文件位于 `release/0.7.2`。技术栈为 Electron、React、Ant Design、Python、PyAV、Pillow、FFmpeg 和 yt-dlp。固定版本源码可从对应发行页下载；第三方工具的来源和重建方法见 [二进制与源材料](docs/二进制发布准备.md)。
 
 </details>
 

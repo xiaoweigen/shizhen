@@ -87,7 +87,7 @@ with zipfile.ZipFile(program / 'resources/worker/_internal/base_library.zip') as
         if name.endswith('.pyc'):
             code(marshal.loads(library.read(name)[16:]), 'python-base:' + name)
 check_file(release / f'Framepick-Setup-{version}.exe', 'installer')
-payload=root / '.test-artifacts' / version / 'installer-check/payload'
+payload=root / '.test-artifacts' / version / 'installer-check/final/payload'
 identical=0
 if payload.exists():
     expected={file.relative_to(program).as_posix():file for file in files}
@@ -100,7 +100,7 @@ if payload.exists():
                 raise ValueError('Installer payload differs from tested program: '+name)
         identical+=1
 
-images = list((root / 'docs/images').glob('*0.7.1.png'))
+images = [root / 'docs/images' / name for name in ('workbench-0.7.1.png','playable-crop-0.7.0.png','storyboard-markers-0.6.2.png','sheets-grid-0.6.2.png')]
 for file in images:
     with Image.open(file) as picture:
         if picture.info or picture.getexif():

@@ -39,8 +39,8 @@ async function launch() {
   return page
 }
 
-async function waitState(page, predicate) {
-  await expect.poll(async () => predicate(await page.evaluate(() => window.framepick.snapshot())), { timeout: 60000 }).toBe(true)
+async function waitState(page, predicate, timeout = 60000) {
+  await expect.poll(async () => predicate(await page.evaluate(() => window.framepick.snapshot())), { timeout }).toBe(true)
 }
 
 async function screenshot(name) {
@@ -447,12 +447,14 @@ async function screenshot(name) {
       assert(testUrl,'Set FRAMEPICK_TEST_URL for online testing.')
       const downloadRoot=path.join(artifact,'downloads');fs.mkdirSync(downloadRoot,{recursive:true})
       const baselineJobs=(await page.evaluate(()=>window.framepick.snapshot())).jobs.length
+      const onlineQuality=Number(process.env.FRAMEPICK_TEST_QUALITY||360)
+      await page.evaluate(async quality=>{const s=await window.framepick.snapshot();await window.framepick.saveSettings({...s.settings,onlineQuality:quality})},onlineQuality)
       await application.evaluate(({dialog})=>{dialog.showOpenDialog=async()=>({canceled:true,filePaths:[]})})
       const cancelled=await page.evaluate(url=>window.framepick.resolveLinks(url),testUrl);assert(cancelled.cancelled)
       assert.equal((await page.evaluate(()=>window.framepick.snapshot())).jobs.length,baselineJobs)
       await application.evaluate(({dialog},folder)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[folder]})},downloadRoot)
       const resolved=await page.evaluate(url=>window.framepick.resolveLinks(url),testUrl);assert.equal(resolved.queued,1)
-      await waitState(page,s=>s.jobs.length===baselineJobs+1&&s.jobs.at(-1).status==='done')
+      await waitState(page,s=>s.jobs.length===baselineJobs+1&&s.jobs.at(-1).status==='done',180000)
       const online=(await page.evaluate(()=>window.framepick.snapshot())).videos.find(v=>v.id===resolved.ids[0]);assert.equal(path.dirname(online.downloadedPath),downloadRoot);assert(!online.previewPath)
       await page.evaluate(async id=>{const s=await window.framepick.snapshot();await window.framepick.saveSettings({...s.settings,interval:.5,includeStart:false,autoStitch:true});await window.framepick.setExtractRanges([id],{start:0,end:2});await window.framepick.enqueue([id])},online.id)
       await waitState(page,s=>s.jobs.length===baselineJobs+2&&s.jobs.at(-1).status==='done')
